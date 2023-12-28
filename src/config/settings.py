@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     
     "widget_tweaks",
     "ckeditor",
+    "mptt",
     
     "newsletter",
 ]

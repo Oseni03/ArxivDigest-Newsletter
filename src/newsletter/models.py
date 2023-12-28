@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ckeditor.fields import RichTextField
+from mptt.models import MPTTModel, TreeForeignKey
 
 from . import signals
 from .app_settings import NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
@@ -67,17 +68,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         return str(self.email)
 
 
-class PaperTopic(models.Model):
+class PaperTopic(MPTTModel):
     name = models.CharField(max_length=255)
     abbrv = models.SlugField(null=True)
+    parent = TreeForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
+    
+    class MPTTMeta:
+        order_insertion_by = ['name']
         verbose_name_plural = 'Paper topics'
-
+    
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Paper(models.Model):
