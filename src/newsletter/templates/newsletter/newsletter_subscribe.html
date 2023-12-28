@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+Subscribe
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col col-9 py-4">
+            <h1 class="text-primary text-center">Create Account</h1>
+            <div class="mt-3">
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {% render_field form.email class="form-control" placeholder="Enter email address" %}
+                    </div>
+                    <div class="mb-3">
+                        {% render_field form.password class="form-control" placeholder="Enter password" %}
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Subscribe</button>
+                        <p class="my-2">Already have an account? <a href="{% url 'newsletter:login' %}">Login</a></p>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>    
+    
+{% endblock %}
+

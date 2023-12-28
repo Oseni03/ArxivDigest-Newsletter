@@ -23,7 +23,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    "accounts",
+    "widget_tweaks",
+    "ckeditor",
+    
+    "newsletter",
 ]
 
 MIDDLEWARE = [
@@ -112,3 +115,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST_USER = "example@gmail.com"
+
+
+AUTH_USER_MODEL = "newsletter.User"
+
+LOGIN_REDIRECT_URL = "/newsletters/"

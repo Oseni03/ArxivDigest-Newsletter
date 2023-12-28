@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+Computer Science 
+{% endblock %}
+
+{% block content %}
+    
+    <div class="container">
+        <div id="cs" class="mt-4">
+          <div class="text-center">
+              <h2 class="text-primary">Computer Science</h2>
+          </div>
+          <div class="d-grid gap-1 d-sm-flex justify-content-sm-center">
+            <select class="col form-select" aria-label="Default select example">
+              <option selected>Select topic</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+            <button type="button" class="btn btn-primary px-4">filter</button>
+          </div>
+          <hr class="my-3">
+         
+          <div class="row row-cols-1 row-cols-md-2 g-3 mt-3">
+            <div class="col">
+                <div class="card shadow border-primary" >
+                  <div class="card-body">
+                    <h4 class="card-title">Primary card title</h4>
+                    <p class="text-muted">January 1, 2021 by </p>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
+                    <button class="btn btn-primary btn-lg">View</button>
+                  </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow border-primary" >
+                  <div class="card-body">
+                    <h4 class="card-title">Primary card title</h4>
+                    <p class="text-muted">January 1, 2021 by </p>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
+                    <button class="btn btn-primary btn-lg">View</button>
+                  </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow border-primary" >
+                  <div class="card-body">
+                    <h4 class="card-title">Primary card title</h4>
+                    <p class="text-muted">January 1, 2021 by </p>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
+                    <button class="btn btn-primary btn-lg">View</button>
+                  </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow border-primary" >
+                  <div class="card-body">
+                    <h4 class="card-title">Primary card title</h4>
+                    <p class="text-muted">January 1, 2021 by </p>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
+                    <button class="btn btn-primary btn-lg">View</button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+{% endblock %}
