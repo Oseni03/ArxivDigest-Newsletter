@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +27,8 @@ INSTALLED_APPS = [
     "widget_tweaks",
     "ckeditor",
     "mptt",
+    'django_celery_beat',
+    'django_celery_results',
     
     "newsletter",
 ]
@@ -123,3 +126,31 @@ EMAIL_HOST_USER = "example@gmail.com"
 AUTH_USER_MODEL = "newsletter.User"
 
 LOGIN_REDIRECT_URL = "/newsletters/"
+
+
+#-----------------------------------
+# REDIS DEFINITION 
+#-----------------------------------
+REDIS_URL = f'{os.environ.get("REDIS_URL", default="redis://127.0.0.1:6379")}/{0}'
+
+
+#-----------------------------------
+# CELERY DEFINITION 
+#-----------------------------------
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+# this allows you to schedule items in the Django admin.
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+CELERY_CACHE_BACKEND = 'default'
+
+# django setting.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+    }
+}
