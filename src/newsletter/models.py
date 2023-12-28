@@ -1,11 +1,11 @@
 import uuid
 # import hashid_field
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.contrib.auth.models import BaseUserManager
-from django.contrib.auth.models import Group
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
