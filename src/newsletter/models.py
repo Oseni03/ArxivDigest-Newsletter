@@ -92,8 +92,10 @@ class Paper(models.Model):
         null=True
     )
     title = models.CharField(max_length=255)
+    subjects = models.CharField(max_length=255)
+    paper_number = models.PositiveIntegerField()
     authors = models.CharField(max_length=255)
-    source_url = models.URLField()
+    main_page = models.URLField()
     pdf_url = models.URLField()
     is_visible = models.BooleanField(default=True)
     abstract = models.TextField()
@@ -108,7 +110,7 @@ class Paper(models.Model):
         ordering = ['-published_at']
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
 
 class Newsletter(models.Model):
