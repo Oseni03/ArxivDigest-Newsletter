@@ -1,6 +1,10 @@
 from celery import shared_task
+from langchain.document_loaders import DataFrameLoader
 
 from .models import PaperTopic, Paper
+from newsletter.vectorstore.pgvector_service import PgvectorService
+
+from django.conf import settings
 
 import os
 import random
@@ -64,10 +68,26 @@ def get_papers(field_abbr):
     return new_paper_list
 
 
+def embed_papers(papers: list, columns: list=None):
+    if not columns:
+        columns = [
+            'title', 'subjects',
+            'paper_number', 'authors', 'main_page', 
+            'pdf', 'date', 'abstract'
+        ]
+    df = pd.DataFrame(papers, columns)
+    loader = DataFrameLoader(df, page_content_column="abstract")
+    docs = loader.load()
+    
+    pg_vectorstore = PgvectorService(settings.CONNECTION_STRING)
+    pg_vectorstore.update_collection(docs, collection_name=datetime.date.today().strftime("%d-%m-%Y"))
+
+
 @shared_task
 def get_new_papers():
     topics = PaperTopic.objects.all()
     new_paper_count = 0
+    new_paper_list = []
     for topic in topics:
         if topic.abbrv:
             papers = get_papers(topic.abbrv)
@@ -86,6 +106,6 @@ def get_new_papers():
                 )
                 if created:
                     new_paper_count += 1
+                    new_paper_list.append(paper)
+    embed_papers(new)
     return f"Saved paper count: {new_paper_count}"
-
-

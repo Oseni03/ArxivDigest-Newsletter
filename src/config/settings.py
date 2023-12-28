@@ -154,3 +154,7 @@ CACHES = {
         'LOCATION': 'cache_table',
     }
 }
+
+
+# PG-VECTORSTORE
+CONNECTION_STRING = ""
