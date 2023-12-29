@@ -16,3 +16,6 @@ class PaperQuerySet(models.QuerySet):
 
     def visible(self):
         return self.filter(is_visible=True)
+    
+    def parents(self):
+        return self.filter(level=0)

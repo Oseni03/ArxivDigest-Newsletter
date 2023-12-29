@@ -85,7 +85,7 @@ def embed_papers(papers: list, columns: list=None):
 
 @shared_task
 def get_new_papers():
-    topics = PaperTopic.objects.all()
+    topics = PaperTopic.objects.parents()
     new_paper_count = 0
     new_paper_list = []
     for topic in topics:
@@ -94,18 +94,33 @@ def get_new_papers():
             for paper in papers:
                 date_format = "%a, %d %b %y"
                 formatted_date = datetime.datetime.strptime(paper["date"], date_format)
+                subjects = paper["subjects"].split(";")
+                topics_abbrev = [
+                    sub.replace(")", "").split("(")[-1]
+                    for sub in subjects
+                ]
+                subjs = []
+                for abbrv in topics_abbrev:
+                    sub = PaperTopic.objects.filter(abbrv=abbrv)
+                    if sub.exists():
+                        subjs.append(sub.first())
+                subjs.append(topic)
                 
-                _, created = Paper.objects.get_or_create(
-                    topic=topic,
-                    title=paper["title"],
-                    authors=paper["authors"],
-                    main_page=paper["main_page"],
+                paper_obj, created = Paper.objects.get_or_create(
+                    paper_number=paper["paper_number"],
                     pdf_url=paper["pdf"],
-                    abstract    =paper["abstract"],
                     published_at    =formatted_date.date(),
+                    defaults={
+                        "abstract": paper["abstract"],
+                        "main_page": paper["main_page"],
+                        "title": paper["title"],
+                        "authors": paper["authors"],
+                    }
                 )
                 if created:
                     new_paper_count += 1
                     new_paper_list.append(paper)
+                    paper_obj.topics.add(subjs)
+                    paper_obj.save()
     embed_papers(new)
     return f"Saved paper count: {new_paper_count}"

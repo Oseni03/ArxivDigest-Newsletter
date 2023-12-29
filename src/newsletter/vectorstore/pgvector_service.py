@@ -25,7 +25,7 @@ class PgvectorService:
     def get_vector(self, text):
         return self.embeddings.embed_query(text)
 
-    def custom_similarity_search_with_scores(self, query, k=3):
+    def custom_similarity_search_with_scores(self, query, k=10):
         query_vector = self.get_vector(query)
 
         with Session(self.engine) as session:
