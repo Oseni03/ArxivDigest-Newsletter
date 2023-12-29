@@ -70,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class PaperTopic(MPTTModel):
     name = models.CharField(max_length=255)
-    abbrv = models.SlugField(null=True)
+    abbrv = models.CharField(max_length=50)
     parent = TreeForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -84,15 +84,8 @@ class PaperTopic(MPTTModel):
 
 
 class Paper(models.Model):
-    topic = models.ForeignKey(
-        PaperTopic,
-        on_delete=models.SET_NULL,
-        related_name='papers',
-        blank=True,
-        null=True
-    )
+    topics = models.ManyToManyField(PaperTopic, related_name='papers')
     title = models.CharField(max_length=255)
-    subjects = models.CharField(max_length=255)
     paper_number = models.PositiveIntegerField()
     authors = models.CharField(max_length=255)
     main_page = models.URLField()

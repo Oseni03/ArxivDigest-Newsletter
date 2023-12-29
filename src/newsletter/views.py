@@ -30,24 +30,24 @@ class TopicDetailView(SingleObjectMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['topic'] = self.object
+        context['topic'] = self.object.prefetch_related("papers")
         return context
 
     def get_queryset(self):
-        return self.object.papers.visible().select_related('topic')
+        return self.object.papers.visible().prefetch_related('topics')
 
 
 class LatestTopicView(TemplateView):
     template_name = "newsletter/home.html"
 
     def get_context_data(self, **kwargs):
-        prefetch_papers = Paper.objects.visible().select_related('topic')
-        latest_topic = PaperTopic.objects.prefetch_related(
+        prefetch_papers = Paper.objects.visible().prefetch_related('topics')
+        latest_topics = PaperTopic.objects.prefetch_related(
             Prefetch('papers', queryset=prefetch_papers)
-        ).all()
+        ).parents()
 
         context = super().get_context_data(**kwargs)
-        context['topics'] = latest_topic
+        context['topics'] = latest_topics
         return context
 
 
