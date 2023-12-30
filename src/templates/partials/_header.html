@@ -32,15 +32,56 @@
                     </div>
                   </li>
                   <li class="mb-1">
-                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
-                      Dashboard
+                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#topics-collapse" aria-expanded="false">
+                      Topics 
                     </button>
-                    <div class="collapse" id="dashboard-collapse">
+                    <div class="collapse" id="topics-collapse">
                       <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Overview</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Weekly</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Monthly</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Annually</a></li>
+                        {% for topic in topics %}
+                        {% if topic.is_leaf_node %}
+                        <li><a href="{{ topic.get_absolute_url }}" class="link-body-primary d-inline-flex text-decoration-none rounded">{{ topic.name|title }}</a></li>
+                        {% else %}
+                        <li class="mb-1">
+                            <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ topic.abbrv }}-collapse" aria-expanded="false">
+                              {{ topic.name|title }} 
+                            </button>
+                            <div class="collapse" id="{{ topic.abbrv }}-collapse">
+                              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                                {% for subtopic in topic.get_children %}
+                                {% if subtopic.is_leaf_node %}
+                                <li><a href="{{ subtopic.get_absolute_url }}" class="link-body-primary d-inline-flex text-decoration-none rounded">{{ subtopic.name|title }}</a></li>
+                                {% else %}
+                                <li class="ps-3">
+                                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ subtopic.abbrv }}-collapse" aria-expanded="false">
+                                      {{ subtopic.name|title }} 
+                                    </button>
+                                    <div class="collapse" id="{{ subtopic.abbrv }}-collapse">
+                                      <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                                          {% for sub_subtopic in subtopic %}
+                                          <li><a href="{{ sub_subtopic.get_absolute_url }}" class="link-body-primary d-inline-flex text-decoration-none rounded">{{ sub_subtopic.name|title }}</a></li>
+                                          {% endfor %}
+                                      </ul>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                              </ul>
+                            </div>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        <li class="ps-3">
+                            <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#subtopics-collapse" aria-expanded="false">
+                              Subtopics 
+                            </button>
+                            <div class="collapse" id="subtopics-collapse">
+                              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                                <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Subtopic 1</a></li>
+                                <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Subtopic 2</a></li>
+                              </ul>
+                            </div>
+                            
+                        </li>
                       </ul>
                     </div>
                   </li>

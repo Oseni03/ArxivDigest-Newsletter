@@ -18,7 +18,7 @@ app_name = 'newsletter'
 urlpatterns = [
     path('', LatestTopicView.as_view(), name='home'),
     path(
-        'topics/<slug:slug>/',
+        'topics/<str:abbrv>/',
         TopicDetailView.as_view(),
         name='topic_detail'
     ),
