@@ -7,10 +7,9 @@ from newsletter.utils.send_newsletters import send_email_newsletter
 class NewsletterAdmin(admin.ModelAdmin):
     date_hierarchy = 'schedule'
     list_display = (
-        'subject', 'is_sent', 'schedule',
+        'topic', 'last_sent', 'schedule',
     )
-    list_filter = ('is_sent',)
-    search_fields = ('subject',)
+    search_fields = ('topic',)
     readonly_fields = ('created_at', 'updated_at',)
     sortable_by = ('schedule',)
 

@@ -151,7 +151,7 @@ class NewsletterUnsubscribeView(TemplateView):
     
             if subscriber:
                 subscriber.unsubscribe()
-                return render(request, "newsletter/newsletter_unsubscribed")
+                return render(request, "newsletter/newsletter_unsubscribed.html")
             else:
                 messages.info(request, 'Subscriber with this e-mail address does not exist.')
                 return redirect(reverse("newsletter:home"))

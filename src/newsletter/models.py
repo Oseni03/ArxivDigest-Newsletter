@@ -97,6 +97,7 @@ class Paper(models.Model):
     pdf_url = models.URLField()
     is_visible = models.BooleanField(default=True)
     abstract = models.TextField()
+    summary = models.TextField(null=True)
     published_at = models.DateField()
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -112,16 +113,30 @@ class Paper(models.Model):
 
 
 class Newsletter(models.Model):
-    subject = models.CharField(max_length=128)
     schedule = models.DateTimeField(blank=True, null=True)
-    is_sent = models.BooleanField(default=False)
-    sent_at = models.DateTimeField(blank=True, null=True)
+    last_sent = models.DateTimeField(blank=True, null=True)
+    topic = models.OneToOneField(PaperTopic, related_name="newsletter", on_delete=models.CASCADE)
+    subscribers = models.ManyToManyField("Subscriber")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.subject
+        return str(self.topic)
+
+
+class PersonalNewsletter(models.Model):
+    subject = models.CharField(max_length=255)
+    schedule = models.DateTimeField(blank=True, null=True)
+    last_sent = models.DateTimeField(blank=True, null=True)
+    subscriber = models.ForeignKey("Subscriber", related_name="newsletters", on_delete=models.CASCADE)
+    papers = models.ManyToManyField(Paper)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.subject)
 
 
 class Subscriber(models.Model):
@@ -136,7 +151,7 @@ class Subscriber(models.Model):
     objects = SubscriberQuerySet.as_manager()
 
     def __str__(self):
-        return self.email
+        return str(self.email)
     
     @property
     def email(self):
