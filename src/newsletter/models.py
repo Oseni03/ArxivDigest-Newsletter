@@ -13,7 +13,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 from . import signals
 from .app_settings import NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
 from .constants import ISSUE_TYPE_CHOICES, WEEKLY_ISSUE
-from .querysets import SubscriberQuerySet, PaperQuerySet
+from .querysets import SubscriberQuerySet, PaperQuerySet, PaperTopicQuerySet
 from .utils.send_verification import send_subscription_verification_email
 
 
@@ -70,10 +70,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class PaperTopic(MPTTModel):
     name = models.CharField(max_length=255)
-    abbrv = models.CharField(max_length=50)
+    abbrv = models.CharField(max_length=50, null=True)
     parent = TreeForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = PaperTopicQuerySet.as_manager()
     
     class MPTTMeta:
         order_insertion_by = ['name']
@@ -81,6 +83,9 @@ class PaperTopic(MPTTModel):
     
     def __str__(self):
         return str(self.name)
+    
+    def get_absolute_url(self):
+        return reverse("newsletter:topic_detail", args=(self.abbrv,))
 
 
 class Paper(models.Model):
