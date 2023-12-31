@@ -112,29 +112,29 @@ class Paper(models.Model):
         return str(self.title)
 
 
-class Newsletter(models.Model):
+class NewsletterBase(models.Model):
     schedule = models.DateTimeField(blank=True, null=True)
     last_sent = models.DateTimeField(blank=True, null=True)
-    topic = models.OneToOneField(PaperTopic, related_name="newsletter", on_delete=models.CASCADE)
-    subscribers = models.ManyToManyField("Subscriber")
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        abstract = True
+    
 
+class Newsletter(NewsletterBase):
+    topic = models.OneToOneField(PaperTopic, related_name="newsletter", on_delete=models.CASCADE)
+    subscribers = models.ManyToManyField("Subscriber")
+    
     def __str__(self):
         return str(self.topic)
 
 
-class PersonalNewsletter(models.Model):
+class PersonalNewsletter(NewsletterBase):
     subject = models.CharField(max_length=255)
-    schedule = models.DateTimeField(blank=True, null=True)
-    last_sent = models.DateTimeField(blank=True, null=True)
     subscriber = models.ForeignKey("Subscriber", related_name="newsletters", on_delete=models.CASCADE)
     papers = models.ManyToManyField(Paper)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    
     def __str__(self):
         return str(self.subject)
 
