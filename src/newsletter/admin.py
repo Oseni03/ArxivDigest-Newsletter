@@ -1,17 +1,18 @@
 from django.contrib import admin, messages
 
-from .models import Newsletter, Paper, PaperTopic, Subscriber
+from .models import Newsletter, Paper, PaperTopic, Subscriber, Subscription
 from newsletter.utils.send_newsletters import send_email_newsletter
 
 
 class NewsletterAdmin(admin.ModelAdmin):
-    date_hierarchy = 'schedule'
+    prepopulated_fields = {"slug": ["title"]}
+    date_hierarchy = 'created_at'
     list_display = (
-        'topic', 'last_sent', 'schedule',
+        'title', 'topic', 'schedule', 'sent_at',
     )
-    search_fields = ('topic',)
-    readonly_fields = ('created_at', 'updated_at',)
-    sortable_by = ('schedule',)
+    search_fields = ('topic', 'title')
+    readonly_fields = ('created_at', 'sent_at',)
+    sortable_by = ('schedule', 'sent_at', 'created_at')
 
     actions = ('send_newsletters',)
 
@@ -69,6 +70,10 @@ class PaperTopicAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('topic', 'created_at', 'updated_at')
+
+
 class SubscriberAdmin(admin.ModelAdmin):
     list_display = (
         'email', 'subscribed',
@@ -88,3 +93,4 @@ admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(Paper)
 admin.site.register(PaperTopic, PaperTopicAdmin)
 admin.site.register(Subscriber, SubscriberAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)
