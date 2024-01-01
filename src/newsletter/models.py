@@ -2,6 +2,7 @@ import uuid
 # import hashid_field
 from django.db import models
 from django.urls import reverse
+from django.contrib import admin
 from django.utils import timezone
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import BaseUserManager
@@ -112,31 +113,17 @@ class Paper(models.Model):
         return str(self.title)
 
 
-class NewsletterBase(models.Model):
+class Newsletter(models.Model):
+    topic = models.ForeignKey(PaperTopic, related_name="newsletter", on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    content = RichTextField()
     schedule = models.DateTimeField(blank=True, null=True)
-    last_sent = models.DateTimeField(blank=True, null=True)
+    sent_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        abstract = True
-    
-
-class Newsletter(NewsletterBase):
-    topic = models.OneToOneField(PaperTopic, related_name="newsletter", on_delete=models.CASCADE)
-    subscribers = models.ManyToManyField("Subscriber")
+    slug = models.SlugField()
     
     def __str__(self):
         return str(self.topic)
-
-
-class PersonalNewsletter(NewsletterBase):
-    subject = models.CharField(max_length=255)
-    subscriber = models.ForeignKey("Subscriber", related_name="newsletters", on_delete=models.CASCADE)
-    papers = models.ManyToManyField(Paper)
-    
-    def __str__(self):
-        return str(self.subject)
 
 
 class Subscriber(models.Model):
@@ -231,10 +218,12 @@ class Subscriber(models.Model):
         )
 
 
-class EmailTemplate(models.Model):
-    subject = models.CharField(max_length=150)
-    message = RichTextField()
-    is_active = models.BooleanField(default=False)
+class Subscription(models.Model):
+    subscribers = models.ManyToManyField(Subscriber, related_name="subscriptions")
+    topic = models.OneToOneField(PaperTopic, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-    def __str__(self):
-        return str(self.subject)
+    @admin.display(description="Subscribers count")
+    def subscribers_count(self):
+        return f"{len(self.subscribers.all())}"
