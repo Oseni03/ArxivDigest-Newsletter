@@ -71,12 +71,12 @@ class PaperTopicAdmin(admin.ModelAdmin):
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('topic', 'created_at', 'updated_at')
+    list_display = ('topic', 'subscriber', 'created_at',)
 
 
 class SubscriberAdmin(admin.ModelAdmin):
     list_display = (
-        'email', 'subscribed',
+        'email_address', 'subscribed',
         'verified', 'token_expired',
         'verification_sent_date',
     )

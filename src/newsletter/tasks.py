@@ -1,18 +1,18 @@
 from celery import shared_task
 from langchain.document_loaders import DataFrameLoader
 
-from .models import PaperTopic, Paper
+from django.conf import settings
 from newsletter.vectorstore.pgvector_service import PgvectorService
 
-from django.conf import settings
+from .utils.send_welcome import send_welcome_email
 
 import os
-import random
-import tqdm
-from bs4 import BeautifulSoup as bs
-import urllib.request
+# import tqdm
 import json
+import random
 import datetime
+import urllib.request
+from bs4 import BeautifulSoup as bs
 
 
 user_agents = [
@@ -85,6 +85,8 @@ def embed_papers(papers: list, columns: list=None):
 
 @shared_task
 def get_new_papers():
+    from .models import PaperTopic, paper
+
     topics = PaperTopic.objects.parents()
     new_paper_count = 0
     new_paper_list = []
@@ -124,3 +126,16 @@ def get_new_papers():
                     paper_obj.save()
     embed_papers(new)
     return f"Saved paper count: {new_paper_count}"
+
+
+@shared_task(name='newsletter.unsnooze')
+def unsnooze(subscriber_id: int):
+    from .models import Subscriber
+    
+    subscriber = Subscriber.objects.get(id=subscriber_id)
+    subscriber.unsnooze()
+
+
+@shared_task(name='newsletter.welcome')
+def send_welcome_email_task(to_email):
+    send_welcome_email(to_email)

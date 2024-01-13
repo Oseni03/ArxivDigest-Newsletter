@@ -2,6 +2,7 @@ import uuid
 # import hashid_field
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 from django.contrib import admin
 from django.utils import timezone
 from django.contrib.auth.models import Group
@@ -12,60 +13,9 @@ from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
 
 from . import signals
-from .app_settings import NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
+from .tasks import send_welcome_email_task
 from .querysets import SubscriberQuerySet, PaperQuerySet, PaperTopicQuerySet
 from .utils.send_verification import send_subscription_verification_email
-
-
-class UserManager(BaseUserManager):
-    def create_user(self, email, password=None):
-        if not email:
-            raise ValueError("Users must have an email address")
-
-        user = self.model(
-            email=self.normalize_email(email).lower(),
-        )
-        user.set_password(password)
-        group_user, _ = Group.objects.get_or_create(name="user")
-        user.save(using=self._db)
-        user.groups.add(group_user)
-        UserProfile.objects.create(user=user)
-
-        return user
-
-    def create_superuser(self, email, password):
-        user = self.create_user(
-            email,
-            password=password,
-        )
-        group_admin, _ = Group.objects.get_or_create(name="admin")
-        user.is_active = True
-        user.is_superuser = True
-        user.groups.add(group_admin)
-        user.save(using=self._db)
-        return user
-
-    def filter_admins(self):
-        return self.filter(groups__name="admin")
-
-
-class User(AbstractBaseUser, PermissionsMixin):
-    # id = hashid_field.HashidAutoField(primary_key=True)
-    created = models.DateTimeField(editable=False, auto_now_add=True)
-    email = models.EmailField(
-        verbose_name="email address",
-        max_length=255,
-        unique=True,
-    )
-    is_active = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-
-    objects = UserManager()
-
-    USERNAME_FIELD = "email"
-
-    def __str__(self) -> str:
-        return str(self.email)
 
 
 class PaperTopic(MPTTModel):
@@ -129,10 +79,11 @@ class Newsletter(models.Model):
 
 
 class Subscriber(models.Model):
-    user = models.OneToOneField(User, related_name="subscriber", on_delete=models.CASCADE)
+    email_address = models.EmailField(unique=True)
     token = models.CharField(max_length=128, unique=True, default=uuid.uuid4)
     verified = models.BooleanField(default=False)
     subscribed = models.BooleanField(default=False)
+    snoozed = models.BooleanField(default=False)
     verification_sent_date = models.DateTimeField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -140,11 +91,7 @@ class Subscriber(models.Model):
     objects = SubscriberQuerySet.as_manager()
 
     def __str__(self):
-        return str(self.email)
-    
-    @property
-    def email(self):
-        return self.user.email
+        return self.email_address
 
     def token_expired(self):
         if not self.verification_sent_date:
@@ -152,7 +99,7 @@ class Subscriber(models.Model):
 
         expiration_date = (
             self.verification_sent_date + timezone.timedelta(
-                days=NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
+                days=settings.NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
             )
         )
         return expiration_date <= timezone.now()
@@ -167,19 +114,17 @@ class Subscriber(models.Model):
         self.save()
 
     def subscribe(self):
-        if not self.token_expired():
+        if not settings.NEWSLETTER_SEND_VERIFICATION or not self.token_expired():
             self.verified = True
             self.subscribed = True
-            self.user.is_active = True
-            self.user.save()
             self.save()
 
             signals.subscribed.send(
                 sender=self.__class__, instance=self
             )
-
+            send_welcome_email_task.delay(self.email_address)
             return True
-
+    
     def unsubscribe(self):
         if self.subscribed:
             self.subscribed = False
@@ -192,7 +137,27 @@ class Subscriber(models.Model):
 
             return True
 
-    def send_verification_email(self, created):
+    def snooze(self):
+        if not self.snoozed:
+            self.snoozed = True
+            self.save()
+
+            signals.snoozed.send(
+                sender=self.__class__, instance=self
+            )
+            return True
+    
+    def unsnooze(self):
+        if self.snoozed:
+            self.snoozed = False
+            self.save()
+
+            signals.unsnoozed.send(
+                sender=self.__class__, instance=self
+            )
+            return True
+    
+    def send_verification_email(self, created, niche):
         minutes_before = timezone.now() - timezone.timedelta(minutes=5)
         sent_date = self.verification_sent_date
 
@@ -207,7 +172,9 @@ class Subscriber(models.Model):
         self.save()
 
         send_subscription_verification_email(
-            self.get_verification_url(), self.email
+            self.get_verification_url(), 
+            self.email_address,
+            niche
         )
         signals.email_verification_sent.send(
             sender=self.__class__, instance=self
@@ -221,11 +188,7 @@ class Subscriber(models.Model):
 
 
 class Subscription(models.Model):
-    subscribers = models.ManyToManyField(Subscriber, related_name="subscriptions")
-    topic = models.OneToOneField(PaperTopic, on_delete=models.CASCADE)
+    subscriber = models.ForeignKey(Subscriber, related_name="subscriptions", on_delete=models.CASCADE)
+    topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    @admin.display(description="Subscribers count")
-    def subscribers_count(self):
-        return f"{len(self.subscribers.all())}"

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse 
+from django.conf import settings
 from django.contrib import messages
 from django.db.models import Prefetch
 from django.http import JsonResponse
@@ -7,13 +8,9 @@ from django.contrib import messages
 from django.views.generic import DetailView, FormView, ListView, TemplateView, View
 from django.views.generic.detail import SingleObjectMixin
 
-from .app_settings import (
-    NEWSLETTER_SUBSCRIPTION_REDIRECT_URL,
-    NEWSLETTER_UNSUBSCRIPTION_REDIRECT_URL,
-)
-from .forms import SubscriberEmailForm, AuthenticationForm
-from .models import PaperTopic, Paper, Subscriber, Newsletter, User
-from .utils.check_ajax import is_ajax
+from .forms import SubscriberEmailForm
+from .models import PaperTopic, Paper, Subscriber, Newsletter
+from .utils.email_validator import email_is_valid
 
 
 class TopicDetailView(SingleObjectMixin, ListView):
@@ -45,7 +42,7 @@ class PaperDetailView(View):
         return render(request, self.template_name, {"paper": paper})
 
 
-class LatestTopicView(TemplateView):
+class HomeView(TemplateView):
     template_name = "newsletter/home.html"
 
     def get_context_data(self, **kwargs):
@@ -56,6 +53,7 @@ class LatestTopicView(TemplateView):
 
         context = super().get_context_data(**kwargs)
         context['topics'] = latest_topics
+        context['subscription_form'] = SubscriberEmailForm()
         return context
 
 
@@ -64,78 +62,54 @@ class NewsletterListView(ListView):
     template_name = "newsletter/newsletters.html"
 
 
-class SubscriptionAjaxResponseMixin(FormView):
-    """Mixin to add Ajax support to the subscription form"""
-    
-    message = ''
-    success = False
-
-    def form_invalid(self, form):
-        response = super().form_invalid(form)
-
-        if is_ajax(self.request):
-            return JsonResponse(
-                form.errors.get_json_data(),
-                status=400
-            )
-        else:
-            messages.error(self.request, self.message)
-            return response
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-
-        if is_ajax(self.request):
-            data = {
-                'message': self.message,
-                'success': self.success
-            }
-            return JsonResponse(data, status=200)
-        else:
-            messages.success(self.request, self.message)
-            return response
-
-
-class NewsletterSubscribeView(TemplateView):
-    form_class = AuthenticationForm
+class NewsletterSubscribeView(FormView):
+    form_class = SubscriberEmailForm
     template_name = "newsletter/newsletter_subscribe.html"
+    success_url = settings.NEWSLETTER_SUBSCRIPTION_REDIRECT_URL
 
-    def get_context_data(self):
-        context = super().get_context_data()
-        context["form"] = AuthenticationForm()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context["source"] = "subscribe"
         return context 
     
-    def post(self, request, *args, **kwargs):
-        form = AuthenticationForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-            
-            user = User.objects.filter(email=email)
-            if user.exists():
-                messages.info(request, 'You have already subscribed to the newsletter.')
-                return redirect(reverse("newsletter:login"))
-            else:
-                user = form.save()
-                user.set_password(form.cleaned_data.get("password"))
-                user.save()
-                subscriber = Subscriber.objects.get(user=user)
-                subscriber.send_verification_email(created=False)
-                return render(request, "newsletter/thank-you.html")
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        for error in form.errors.values():
+            messages.error(self.request, error)
+        return response
+    
+    def form_valid(self, form):
+        email_address = form.cleaned_data.get('email')
+
+        subscriber, created = Subscriber.objects.get_or_create(
+            email_address=email_address
+        )
+
+        if not created and subscriber.subscribed:
+            pass
+            # messages.success(self.request, 'You have already subscribed to the newsletter.')
         else:
-            for error in form.errors.values():
-                messages.info(request, error)
-        context = {
-            "form": form,
-        }
-        return render(request, self.template_name, context)
+            if settings.NEWSLETTER_SEND_VERIFICATION:
+                subscriber.send_verification_email(created, self.request.tenant.schema_name)
+            else:
+                if email_is_valid(subscriber.email_address):
+                    subscriber.subscribe()
+        return super().form_valid(form)
+
+
+class ThankyouView(TemplateView):
+    template_name = "newsletter/thank-you.html"
+    
+    def get_context_data(self):
+        context = super().get_context_data()
+        context["send_verification"] = settings.NEWSLETTER_SEND_VERIFICATION
+        return context
 
 
 class NewsletterSubscribeResendView(View):
     def post(self, request, *args, **kwargs):
         email = request.POST.get("email_address")
-        user = get_object_or_404(User, email=email)
-        subscriber = Subscriber.objects.get(user=user)
+        subscriber = get_object_or_404(Subscriber, email_address=email)
         subscriber.send_verification_email(created=False)
         return render(request, "newsletter/thank-you.html")
 
@@ -154,11 +128,11 @@ class NewsletterUnsubscribeView(TemplateView):
             email = form.cleaned_data.get('email')
             subscriber = Subscriber.objects.filter(
                 subscribed=True,
-                user__email=email
-            ).first()
+                email_address=email
+            )
     
-            if subscriber:
-                subscriber.unsubscribe()
+            if subscriber.exists():
+                subscriber.first().unsubscribe()
                 return render(request, "newsletter/newsletter_unsubscribed.html")
             else:
                 messages.info(request, 'Subscriber with this e-mail address does not exist.')
