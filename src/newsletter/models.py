@@ -13,9 +13,9 @@ from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
 
 from . import signals
-from .tasks import send_welcome_email_task
 from .querysets import SubscriberQuerySet, PaperQuerySet, PaperTopicQuerySet
 from .utils.send_verification import send_subscription_verification_email
+from .utils.send_welcome import send_welcome_email
 
 
 class PaperTopic(MPTTModel):
@@ -122,7 +122,7 @@ class Subscriber(models.Model):
             signals.subscribed.send(
                 sender=self.__class__, instance=self
             )
-            send_welcome_email_task.delay(self.email_address)
+            send_welcome_email(self.email_address)
             return True
     
     def unsubscribe(self):
