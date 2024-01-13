@@ -1,32 +1,23 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView
 
-from .views import (
-    HomeView,
-    TopicDetailView,
-    PaperDetailView,
-    NewsletterListView,
-    NewsletterSubscribeView,
-    NewsletterUnsubscribeView,
-    NewsletterSubscribeResendView,
-    NewsletterSubscriptionConfirmView,
-)
+from . import views
 
 app_name = 'newsletter'
 
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
+    path('', views.HomeView.as_view(), name='home'),
     path(
         'topics/<str:abbrv>/',
-        TopicDetailView.as_view(),
+        views.TopicDetailView.as_view(),
         name='topic_detail'
     ),
     path(
         'topics/<int:paper_number>/',
-        PaperDetailView.as_view(),
+        views.PaperDetailView.as_view(),
         name='paper_detail'
     ),
-    path('newsletters/', NewsletterListView.as_view(), name='newsletters'),
+    path('newsletters/', views.NewsletterListView.as_view(), name='newsletters'),
     path(
         'login/',
         LoginView.as_view(
@@ -35,20 +26,21 @@ urlpatterns = [
         name='login'),
     path(
         'subscribe/',
-        NewsletterSubscribeView.as_view(),
+        views.NewsletterSubscribeView.as_view(),
         name='newsletter_subscribe'),
     path(
         'subscribe/resend/',
-        NewsletterSubscribeResendView.as_view(),
+        views.NewsletterSubscribeResendView.as_view(),
         name='newsletter_subscribe_resend'),
+    path("thank-you/", views.ThankyouView.as_view(), name="thank-you"),
     path(
         'subscribe/confirm/<uuid:token>/',
-        NewsletterSubscriptionConfirmView.as_view(),
+        views.NewsletterSubscriptionConfirmView.as_view(),
         name='newsletter_subscription_confirm'
     ),
     path(
         'unsubscribe/',
-        NewsletterUnsubscribeView.as_view(),
+        views.NewsletterUnsubscribeView.as_view(),
         name='newsletter_unsubscribe'
     ),
 ]
