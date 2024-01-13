@@ -2,22 +2,20 @@ from django.urls import path
 from django.contrib.auth.views import LoginView
 
 from .views import (
+    HomeView,
     TopicDetailView,
     PaperDetailView,
-    LatestTopicView,
     NewsletterListView,
     NewsletterSubscribeView,
     NewsletterUnsubscribeView,
     NewsletterSubscribeResendView,
     NewsletterSubscriptionConfirmView,
 )
-from .forms import AuthenticationForm
-
 
 app_name = 'newsletter'
 
 urlpatterns = [
-    path('', LatestTopicView.as_view(), name='home'),
+    path('', HomeView.as_view(), name='home'),
     path(
         'topics/<str:abbrv>/',
         TopicDetailView.as_view(),

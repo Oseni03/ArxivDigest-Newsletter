@@ -1,5 +1,6 @@
-from pathlib import Path
 import os
+from pathlib import Path
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,11 +124,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST_USER = "example@gmail.com"
 
 
-AUTH_USER_MODEL = "newsletter.User"
-
-LOGIN_REDIRECT_URL = "/newsletters/"
-
-
 #-----------------------------------
 # REDIS DEFINITION 
 #-----------------------------------
@@ -158,3 +154,12 @@ CACHES = {
 
 # PG-VECTORSTORE
 CONNECTION_STRING = ""
+
+# NEWSLETTER CONFIGURATION
+NEWSLETTER_EMAIL_BATCH_WAIT = 0
+NEWSLETTER_EMAIL_BATCH_SIZE = 0
+NEWSLETTER_SITE_BASE_URL = "http://127.0.0.1:8000"
+NEWSLETTER_SUBSCRIPTION_REDIRECT_URL = reverse_lazy('newsletter:thank-you')
+NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+NEWSLETTER_SNOOZE_INTERVAL = 30
+NEWSLETTER_SEND_VERIFICATION = False

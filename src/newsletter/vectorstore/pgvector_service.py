@@ -6,7 +6,7 @@ from langchain_community.vectorstores.pgvector import (
 from langchain_core.documents import Document
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import logging
 
 
@@ -15,7 +15,7 @@ EmbeddingStore = _get_embedding_collection_store()[0]
 
 class PgvectorService:
     def __init__(self, connection_string):
-        load_dotenv()
+        # load_dotenv()
         self.embeddings = OpenAIEmbeddings()
         self.cnx = connection_string
         self.collections = []
