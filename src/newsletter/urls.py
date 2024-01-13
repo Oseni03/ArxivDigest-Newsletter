@@ -3,6 +3,7 @@ from django.contrib.auth.views import LoginView
 
 from .views import (
     TopicDetailView,
+    PaperDetailView,
     LatestTopicView,
     NewsletterListView,
     NewsletterSubscribeView,
@@ -21,6 +22,11 @@ urlpatterns = [
         'topics/<str:abbrv>/',
         TopicDetailView.as_view(),
         name='topic_detail'
+    ),
+    path(
+        'topics/<int:paper_number>/',
+        PaperDetailView.as_view(),
+        name='paper_detail'
     ),
     path('newsletters/', NewsletterListView.as_view(), name='newsletters'),
     path(

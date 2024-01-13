@@ -13,7 +13,6 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 from . import signals
 from .app_settings import NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
-from .constants import ISSUE_TYPE_CHOICES, WEEKLY_ISSUE
 from .querysets import SubscriberQuerySet, PaperQuerySet, PaperTopicQuerySet
 from .utils.send_verification import send_subscription_verification_email
 
@@ -111,6 +110,9 @@ class Paper(models.Model):
 
     def __str__(self):
         return str(self.title)
+    
+    def get_absolute_url(self):
+        return reverse("newsletter:paper_detail", args=(self.paper_number,))
 
 
 class Newsletter(models.Model):

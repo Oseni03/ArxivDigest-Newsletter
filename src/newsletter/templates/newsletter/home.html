@@ -20,58 +20,32 @@ Home
     </div>
     
     <div class="container">
+        {% for topic in topics %}
+        <div id="{{ topic.abbrv }}" class="mt-4">
+            <div class="d-flex">
+                <h2 class="text-primary">{{ topic.name|title }}</h2>
+                <a href="{{ topic.get_absolute_url }}" class="ms-auto">view all</a>
+            </div>
+            <hr class="my-3">
+            <div class="row row-cols-1 row-cols-md-2 g-3 mt-3">
+                {% for paper in topic.papers|slice:":4" %}
+                <div class="col">
+                    <div class="card shadow border-primary" >
+                      <div class="card-body">
+                        <h4 class="card-title">{{ paper.title }}</h4>
+                        <p class="text-muted">{{ paper.published_at }} by {{ paper.authors }}</p>
+                        <p class="card-text">{{ paper.summary }}.</p>
+                        <a href="{{ paper.get_absolute_url }}" class="btn btn-primary btn-lg">View</a>
+                      </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
         <div id="cs" class="mt-4">
           <div class="d-flex">
               <h2 class="text-primary">Computer Science</h2>
-              <a href="#" class="ms-auto">view all</a>
-          </div>
-          <hr class="my-3">
-          <div class="row row-cols-1 row-cols-md-2 g-3 mt-3">
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-          </div>
-        </div>
-        <div id="mat" class="mt-4">
-          <div class="d-flex">
-              <h2 class="text-primary">Mathematics</h2>
               <a href="#" class="ms-auto">view all</a>
           </div>
           <hr class="my-3">
