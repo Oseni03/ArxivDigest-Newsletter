@@ -17,24 +17,32 @@ from .utils.check_ajax import is_ajax
 
 
 class TopicDetailView(SingleObjectMixin, ListView):
-    model = PaperTopic
+    paginate_by = 15
     template_name = "newsletter/topic_detail.html"
     slug_url_kwarg = 'abbrv'
     slug_field = 'abbrv'
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(
-            queryset=PaperTopic.objects.all()
+            queryset=PaperTopic.objects.prefetch_related("children", "papers__topics").all()
         )
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['topic'] = self.object.prefetch_related("papers")
+        context['topic'] = self.object
         return context
 
     def get_queryset(self):
-        return self.object.papers.visible().prefetch_related('topics')
+        return self.object.papers.visible()
+
+
+class PaperDetailView(View):
+    template_name = "newsletter/paper_detail.html"
+
+    def get(self, request, paper_number, *args, **kwargs):
+        paper = get_object_or_404(Paper, paper_number=paper_number)
+        return render(request, self.template_name, {"paper": paper})
 
 
 class LatestTopicView(TemplateView):
