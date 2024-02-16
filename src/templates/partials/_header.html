@@ -1,6 +1,63 @@
 {% load static %}
+{% load widget_tweaks %} 
+
+<div class="modal" id="subscriptionModal" tabindex="-1">
+  <div class="modal-dialog modal-md-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center p-5">
+        <h1 class="text-primary">Subscribe To Our Newsletter</h1>
+        <p class="my-2">Modal body text goes here.Modal body text goes here. Modal body text goes here. Modal body text goes here.</p>
+        <form method="post" action="{% url 'newsletter:newsletter_subscribe' %}">
+          {% csrf_token %}
+          <div class="input-group mb-3">
+            {% render_field subscription_form.email class="form-control" placeholder="Email address" aria-describedby="button-addon2" %}
+            <button
+              class="btn btn-primary btn-md-lg"
+              type="submit"
+              id="button-addon2"
+            >
+              Subscribe
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+    <div class="col-md-3 mb-2 mb-md-0">
+      <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+        <svg class="bi" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+      </a>
+    </div>
+
+    <ul class="nav nav-pill col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a href="#" class="nav-link active px-2 link-secondary">Home</a></li>
+      <li><a href="#" class="nav-link px-2">Features</a></li>
+      <li><a href="#" class="nav-link px-2">Pricing</a></li>
+      <li class="dropdown">
+        <a href="#" class="nav-link px-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+      </li>
+      <li><a href="#" class="nav-link px-2">About</a></li>
+    </ul>
+
+    <div class="col-md-3 text-end">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subscriptionModal">Subscribe</button>
+      <button type="button" class="btn btn-outline-primary me-2">Login</button>
+    </div>
+  </header>
+</div>
 
 
+{% comment %}
     <nav class="navbar fixed-top bg-white" aria-label="Light offcanvas navbar">
         <div class="container-fluid m-lg-2">
           <a class="navbar-brand fw-bold text-primary" href="#">ArxivDigest</a>
@@ -15,7 +72,7 @@
             <div class="offcanvas-body">
               <form class="d-flex mb-3" role="search">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-primary" type="submit">Search</button>
+                <button class="btn btn-outline-primary" type="submit">Subscribe</button>
               </form>
                 
                 <ul class="navbar-nav justify-content-end flex-grow-1 pe-3 list-unstyled ps-0">
@@ -117,3 +174,4 @@
           </div>
         </div>
     </nav>
+{% endcomment %}
