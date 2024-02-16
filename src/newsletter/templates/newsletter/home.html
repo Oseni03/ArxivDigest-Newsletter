@@ -1,100 +1,202 @@
-{% extends "base.html" %}
-{% load static %}
-{% load widget_tweaks %}
-
-{% block title %}
-Home
-{% endblock %}
+{% extends "base.html" %} {% load static %} {% load widget_tweaks %} 
+{% block title %} Home {% endblock %} 
 
 {% block content %}
-    <div class="bg-primary text-white px-4 py-5 text-center">
-        <div class="py-5">
-          <h1 class="display-5 fw-bold text-white">Dark color hero</h1>
-          <div class="col-md-8 mx-auto">
-            <p class="fs-5 mb-4">Quickly design and customize responsive mobile-first sites with Bootstrap, the world’s most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins.</p>
-            <div class="">
-              <form action="{% url 'newsletter:newsletter_subscribe' %}" method="post">
-                {% csrf_token %}
-                {% render_field subscription_form.email class="form-control mb-3" placeholder="Email address" %}
-                <button type="submit" class="btn btn-light text-primary btn-lg fw-bold">Subscribe</button>
-              </form>
-            </div>
+<div class="px-4 text-center">
+  <div class="py-5">
+    <h1 class="display-5 fw-bold text-primary">Arxiv Digest's Newsletter</h1>
+    <div class="col-md-8 mx-auto">
+      <p class="fs-4 mb-4">
+        Quickly design and customize responsive mobile-first sites with
+        Bootstrap, the world’s most popular front-end open source toolkit,
+        featuring Sass variables and mixins, responsive grid system, extensive
+        prebuilt components, and powerful JavaScript plugins.
+      </p>
+      <div class="">
+        <form
+          action="{% url 'newsletter:newsletter_subscribe' %}"
+          method="post"
+        >
+          {% csrf_token %}
+          <div class="input-group mb-3">
+            {% render_field subscription_form.email class="form-control" placeholder="Email address" aria-describedby="button-addon2" %}
+            <button
+              class="btn btn-primary btn-lg"
+              type="submit"
+              id="button-addon2"
+            >
+              Subscribe
+            </button>
           </div>
-        </div>
+        </form>
+      </div>
     </div>
-    
-    <div class="container">
-        {% for topic in topics %}
-        <div id="{{ topic.abbrv }}" class="mt-4">
-            <div class="d-flex">
-                <h2 class="text-primary">{{ topic.name|title }}</h2>
-                <a href="{{ topic.get_absolute_url }}" class="ms-auto">view all</a>
-            </div>
-            <hr class="my-3">
-            <div class="row row-cols-1 row-cols-md-2 g-3 mt-3">
-                {% for paper in topic.papers|slice:":4" %}
-                <div class="col">
-                    <div class="card shadow border-primary" >
-                      <div class="card-body">
-                        <h4 class="card-title">{{ paper.title }}</h4>
-                        <p class="text-muted">{{ paper.published_at }} by {{ paper.authors }}</p>
-                        <p class="card-text">{{ paper.summary }}.</p>
-                        <a href="{{ paper.get_absolute_url }}" class="btn btn-primary btn-lg">View</a>
-                      </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endfor %}
-        <div id="cs" class="mt-4">
-          <div class="d-flex">
-              <h2 class="text-primary">Computer Science</h2>
-              <a href="#" class="ms-auto">view all</a>
-          </div>
-          <hr class="my-3">
-          <div class="row row-cols-1 row-cols-md-2 g-3 mt-3">
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow border-primary" >
-                  <div class="card-body">
-                    <h4 class="card-title">Primary card title</h4>
-                    <p class="text-muted">January 1, 2021 by </p>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias cum neque minus, iure magnam natus, repellat necessitatibus quo dolor consectetur et quod culpa eum voluptatum, debitis odit, inventore. Aspernatur dolorem tempora quae, numquam iure voluptates! Voluptate dolorem recusandae maxime earum..</p>
-                    <button class="btn btn-primary btn-lg">View</button>
-                  </div>
-                </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="my-3 d-flex flex-wrap gap-2 gap-md-3 justify-content-center">
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+    <a class="btn btn-outline-primary rounded py-1 px-2 text-xs">Case Studies</a>
+  </div>
+  <div class="mt-4">
+    <h4 class="text-primary fw-bold">Latest papers</h4>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-3 card-group">
+      <div class="col">
+        <div class="card shadow border-primary">
+          <div class="card-body">
+            <h4 class="card-title">
+              <a
+                href="#"
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                >Primary card title</a
+              >
+            </h4>
+            <p class="text-muted">January 1, 2021 by</p>
+            <p class="card-text">
+              Lorem ipsum dolor sit amet, tetur et quod culpa eum voluptatum,
+              debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
+              iure voluptates! Voluptate dolorem recusandae maxime earum..
+            </p>
+            <div id="categories">
+              <a href=""><span class="badge bg-primary">computer science</span></a>
+              <a href=""><span class="badge bg-primary">vision</span></a>
+              <a href=""><span class="badge bg-primary">mathematics</span></a>
+              <a href=""><span class="badge bg-primary">physics</span></a>
+              <a href=""><span class="badge bg-primary">biology</span></a>
             </div>
           </div>
         </div>
+      </div>
+      <div class="col">
+        <div class="card shadow border-primary">
+          <div class="card-body">
+            <h4 class="card-title">
+              <a
+                href="#"
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                >Primary card title</a
+              >
+            </h4>
+            <p class="text-muted">January 1, 2021 by</p>
+            <p class="card-text">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Molestias cum neque minus, iure magnam natus, repellat
+              necessitatibus quo dolor consectetur et quod culpa eum voluptatum,
+              debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
+              iure voluptates! Voluptate dolorem recusandae maxime earum..
+            </p>
+            <div id="categories">
+              <a href=""><span class="badge bg-primary">computer science</span></a>
+              <a href=""><span class="badge bg-primary">vision</span></a>
+              <a href=""><span class="badge bg-primary">mathematics</span></a>
+              <a href=""><span class="badge bg-primary">physics</span></a>
+              <a href=""><span class="badge bg-primary">biology</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card shadow border-primary">
+          <div class="card-body">
+            <h4 class="card-title">
+              <a
+                href="#"
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                >Primary card title</a
+              >
+            </h4>
+            <p class="text-muted">January 1, 2021 by</p>
+            <p class="card-text">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Molestias cum neque minus, iure magnam natus, repellat
+              necessitatibus quo dolor consectetur et quod culpa eum voluptatum,
+              debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
+              iure voluptates! Voluptate dolorem recusandae maxime earum..
+            </p>
+            <div id="categories">
+              <a href=""><span class="badge bg-primary">computer science</span></a>
+              <a href=""><span class="badge bg-primary">vision</span></a>
+              <a href=""><span class="badge bg-primary">mathematics</span></a>
+              <a href=""><span class="badge bg-primary">physics</span></a>
+              <a href=""><span class="badge bg-primary">biology</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card shadow border-primary">
+          <div class="card-body">
+            <h4 class="card-title">
+              <a
+                href="#"
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                >Primary card title</a
+              >
+            </h4>
+            <p class="text-muted">January 1, 2021 by</p>
+            <p class="card-text">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Molestias cum neque minus, iure magnam natus, repellat
+              necessitatibus quo dolor consectetur et quod culpa eum voluptatum,
+              debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
+              iure voluptates! Voluptate dolorem recusandae maxime earum..
+            </p>
+            <div id="categories">
+              <a href=""><span class="badge bg-primary">computer science</span></a>
+              <a href=""><span class="badge bg-primary">vision</span></a>
+              <a href=""><span class="badge bg-primary">mathematics</span></a>
+              <a href=""><span class="badge bg-primary">physics</span></a>
+              <a href=""><span class="badge bg-primary">biology</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card shadow border-primary">
+          <div class="card-body">
+            <h4 class="card-title">
+              <a
+                href="#"
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                >Primary card title</a
+              >
+            </h4>
+            <p class="text-muted">January 1, 2021 by</p>
+            <p class="card-text">
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+              Molestias cum neque minus, iure magnam natus, repellat
+              necessitatibus quo dolor consectetur et quod culpa eum voluptatum,
+              debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
+              iure voluptates! Voluptate dolorem recusandae maxime earum..
+            </p>
+            <div id="categories">
+              <a href=""><span class="badge bg-primary">computer science</span></a>
+              <a href=""><span class="badge bg-primary">vision</span></a>
+              <a href=""><span class="badge bg-primary">mathematics</span></a>
+              <a href=""><span class="badge bg-primary">physics</span></a>
+              <a href=""><span class="badge bg-primary">biology</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 {% endblock %}
