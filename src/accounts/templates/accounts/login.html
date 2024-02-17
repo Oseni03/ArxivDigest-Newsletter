@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col col-md-9 col-lg-6">
+            <div class="card py-4 px-md-3 shadow">
+                <div class="card-body">
+                    <h4 class='card-title fw-bold'>Sign in</h4>
+                    <h6 class="card-subtitle mb-4 text-body-secondary">Stay updated on the latest research papers.</h6>
+                    {% if form.errors %}
+                        <div id="messages" class="alert alert-info alert-dismissible fade show my-3 d-flex align-items-center" role="alert">
+                          Invalid credentials 
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    <form action="{% url 'newsletter:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {% render_field form.username class="form-control" placeholder="Enter email address" %}
+                        </div>
+                        <div class="mb-3">
+                            {% render_field form.password class="form-control" placeholder="Enter password" %}
+                        </div>
+                        <div class="d-grid">
+                            <p class="mb-3"><a class="fw-semibold link-offset-2 link-underline link-underline-opacity-0" href="{% url 'accounts:reset_password' %}">Forgot password?</a></p>
+                            <button type="submit" class="btn btn-primary btn-lg rounded rounded-5">Login</button>
+                        </div>
+                        <div class="my-3 text-center">
+                            <p class="text-muted">or</p>
+                        </div>
+                        <div class="d-grid">
+                            <a class="btn btn-outline-danger btn-lg rounded rounded-5 mb-3">
+                                <span class="me-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16">
+                                        <path d="M15.545 6.558a9.4 9.4 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.7 7.7 0 0 1 5.352 2.082l-2.284 2.284A4.35 4.35 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.8 4.8 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.7 3.7 0 0 0 1.599-2.431H8v-3.08z"/>
+                                    </svg>
+                                </span>
+                                Sign in with Google
+                            </a>
+                            <a class="btn btn-outline-primary btn-lg rounded rounded-5">
+                                <span class="me-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+                                        <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+                                    </svg>
+                                </span>
+                                Sign in with Facebook
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="my-3 text-center">
+                <p class="fw-semibold">New to ArxivDigest?<a href="{% url 'accounts:register' %}"> Join now</a></p>
+            </div>
+        </div>
+    </div> 
+    
+{% endblock %}
+
