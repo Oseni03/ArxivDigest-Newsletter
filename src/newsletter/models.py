@@ -12,7 +12,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
 
-from . import signals
+# from . import signals
 from .querysets import SubscriberQuerySet, PaperQuerySet, PaperTopicQuerySet
 from .utils.send_verification import send_subscription_verification_email
 from .utils.send_welcome import send_welcome_email

@@ -11,7 +11,7 @@ urlpatterns = [
     path("register/", FormView.as_view(
         template_name="accounts/register.html", 
         form_class=UserCreationForm, 
-        success_url=reverse_lazy("accounts:login"),
+        success_url=reverse_lazy("accounts:login"), # change success-url to price page
     ), name="register"),
     path("login/", auth_views.LoginView.as_view(template_name="accounts/login.html"), name="login"),
     path("logout/", views.logout, name="logout"),
@@ -26,6 +26,6 @@ urlpatterns = [
     path("password-reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
         template_name="accounts/password_reset_confirm.html",
         success_url=reverse_lazy("accounts:password_reset_complete"),
-    ), name="reset_password"),
+    ), name="password_reset"),
     path("password-reset-complete/", auth_views.PasswordResetCompleteView.as_view(template_name="accounts/password_reset_complete.html"), name="password_reset_complete"),
 ]
