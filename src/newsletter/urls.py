@@ -1,5 +1,4 @@
 from django.urls import path
-from django.contrib.auth.views import LoginView
 
 from . import views
 
@@ -18,12 +17,6 @@ urlpatterns = [
         name='paper_detail'
     ),
     path('newsletters/', views.NewsletterListView.as_view(), name='newsletters'),
-    path(
-        'login/',
-        LoginView.as_view(
-            template_name="newsletter/login.html",
-            extra_context={"source": "login"}),
-        name='login'),
     path(
         'subscribe/',
         views.NewsletterSubscribeView.as_view(),
