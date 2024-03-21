@@ -14,6 +14,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DOMAIN_URL = "http://localhost:8000/"
 
 # Application definition
 
@@ -30,9 +31,11 @@ INSTALLED_APPS = [
     "mptt",
     'django_celery_beat',
     'django_celery_results',
+    "djstripe",
     
     "newsletter",
     "accounts",
+    "subscription",
 ]
 
 MIDDLEWARE = [
@@ -119,6 +122,7 @@ STATICFILES_DIRS = [BASE_DIR / "static",]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = "accounts.User"
 
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -164,3 +168,13 @@ NEWSLETTER_SUBSCRIPTION_REDIRECT_URL = reverse_lazy('newsletter:thank-you')
 NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 NEWSLETTER_SNOOZE_INTERVAL = 30
 NEWSLETTER_SEND_VERIFICATION = False
+
+
+# DJSTRIPE CONFIGURATION
+DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
+STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_LIVE_PUBLIC_KEY", "<your publishable key>")
+STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
+STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "<your publishable key>")
+STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<your secret key>")
+STRIPE_LIVE_MODE = False
+DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_WEBHOOK_SECRET", "whsec_xxx")
