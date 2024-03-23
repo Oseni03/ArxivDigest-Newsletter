@@ -1,9 +1,15 @@
+import uuid
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
+
+from .utils import send_subscription_verification_email
+from newsletter.models import PaperTopic
 
 
 class CustomUserManager(BaseUserManager):
@@ -40,9 +46,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Subscriber 
+    token = models.CharField(max_length=128, unique=True, default=uuid.uuid4)
+    verified = models.BooleanField(default=False)
+    snoozed = models.BooleanField(default=False)
+    verification_sent_date = models.DateTimeField(blank=True, null=True)
+    
+    # Subscription 
+    subscribed_topics = models.ManyToManyField(PaperTopic, related_name="users", through="Subscription")
+    
     objects = CustomUserManager()
-
     USERNAME_FIELD = "email"
 
     def __str__(self):
@@ -64,3 +80,94 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Check if the user a member of staff."""
         # Simplest possible answer: All admins are staff
         return self.is_admin
+    
+    @property
+    def subscribed(self):
+        return self.filter(verified=True, is_active=True)
+    
+    def token_expired(self):
+        if not self.verification_sent_date:
+            return True
+
+        expiration_date = (
+            self.verification_sent_date + timezone.timedelta(
+                days=settings.NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
+            )
+        )
+        return expiration_date <= timezone.now()
+
+    def reset_token(self):
+        unique_token = str(uuid.uuid4())
+
+        while self.__class__.objects.filter(token=unique_token).exists():
+            unique_token = str(uuid.uuid4())
+
+        self.token = unique_token
+        self.save()
+    
+    def unsubscribe(self):
+        if self.is_active:
+            self.is_active = False
+            self.verified = False
+            self.save()
+
+            signals.unsubscribed.send(
+                sender=self.__class__, instance=self
+            )
+
+            return True
+
+    def snooze(self):
+        if not self.snoozed:
+            self.snoozed = True
+            self.save()
+
+            signals.snoozed.send(
+                sender=self.__class__, instance=self
+            )
+        return True
+    
+    def unsnooze(self):
+        if self.snoozed:
+            self.snoozed = False
+            self.save()
+
+            signals.unsnoozed.send(
+                sender=self.__class__, instance=self
+            )
+        return True
+    
+    def send_verification_email(self, created):
+        minutes_before = timezone.now() - timezone.timedelta(minutes=5)
+        sent_date = self.verification_sent_date
+
+        # Only send email again if the last sent date is five minutes earlier
+        if sent_date and sent_date >= minutes_before:
+            return
+
+        if not created:
+            self.reset_token()
+
+        self.verification_sent_date = timezone.now()
+        self.save()
+
+        send_subscription_verification_email(
+            self.get_verification_url(), 
+            self.email_address,
+        )
+        signals.email_verification_sent.send(
+            sender=self.__class__, instance=self
+        )
+
+    def get_verification_url(self):
+        return reverse(
+            'newsletter:newsletter_subscription_confirm',
+            kwargs={'token': self.token}
+        )
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

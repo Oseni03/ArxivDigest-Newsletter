@@ -21,16 +21,7 @@ urlpatterns = [
         'subscribe/',
         views.NewsletterSubscribeView.as_view(),
         name='newsletter_subscribe'),
-    path(
-        'subscribe/resend/',
-        views.NewsletterSubscribeResendView.as_view(),
-        name='newsletter_subscribe_resend'),
     path("thank-you/", views.ThankyouView.as_view(), name="thank-you"),
-    path(
-        'subscribe/confirm/<uuid:token>/',
-        views.NewsletterSubscriptionConfirmView.as_view(),
-        name='newsletter_subscription_confirm'
-    ),
     path(
         'unsubscribe/',
         views.NewsletterUnsubscribeView.as_view(),

@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 
-from .models import Newsletter, Paper, PaperTopic, Subscriber, Subscription
+from .models import Newsletter, Paper, PaperTopic
 from newsletter.utils.send_newsletters import send_email_newsletter
 
 
@@ -70,27 +70,6 @@ class PaperTopicAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('topic', 'subscriber', 'created_at',)
-
-
-class SubscriberAdmin(admin.ModelAdmin):
-    list_display = (
-        'email_address', 'subscribed',
-        'verified', 'token_expired',
-        'verification_sent_date',
-    )
-    list_filter = (
-        'subscribed', 'verified',
-        'verification_sent_date',
-    )
-    search_fields = ('email',)
-    readonly_fields = ('created_at',)
-    exclude = ('token',)
-
-
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(Paper)
 admin.site.register(PaperTopic, PaperTopicAdmin)
-admin.site.register(Subscriber, SubscriberAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
