@@ -4,13 +4,15 @@ from django.conf import settings
 from django.contrib import messages
 from django.db.models import Prefetch
 from django.http import JsonResponse
-from django.contrib import messages
 from django.views.generic import DetailView, FormView, ListView, TemplateView, View
 from django.views.generic.detail import SingleObjectMixin
+from django.contrib.auth.forms import UserCreationForm
 
 from .forms import SubscriberEmailForm
-from .models import PaperTopic, Paper, Subscriber, Newsletter
+from .models import PaperTopic, Paper, Newsletter
 from .utils.email_validator import email_is_valid
+
+from accounts.models import User
 
 
 class TopicDetailView(SingleObjectMixin, ListView):
@@ -21,7 +23,7 @@ class TopicDetailView(SingleObjectMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(
-            queryset=PaperTopic.objects.prefetch_related("children", "papers__topics").all()
+            queryset=PaperTopic.objects.prefetch_related("subtopics", "papers__topics").all()
         )
         return super().get(request, *args, **kwargs)
 
@@ -62,39 +64,35 @@ class NewsletterListView(ListView):
     template_name = "newsletter/newsletters.html"
 
 
-class NewsletterSubscribeView(FormView):
-    form_class = SubscriberEmailForm
+class NewsletterSubscribeView(View):
     template_name = "newsletter/newsletter_subscribe.html"
-    success_url = settings.NEWSLETTER_SUBSCRIPTION_REDIRECT_URL
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["source"] = "subscribe"
-        return context 
+    def get(self, request, *args, **kwargs):
+        context = {
+            "source": "subscribe",
+            "form": SubscriberEmailForm(),
+        }
+        return render(request, self.template_name, context) 
     
-    def form_invalid(self, form):
-        response = super().form_invalid(form)
-        for error in form.errors.values():
-            messages.error(self.request, error)
-        return response
-    
-    def form_valid(self, form):
-        email_address = form.cleaned_data.get('email')
-
-        subscriber, created = Subscriber.objects.get_or_create(
-            email_address=email_address
-        )
-
-        if not created and subscriber.subscribed:
-            pass
-            # messages.success(self.request, 'You have already subscribed to the newsletter.')
-        else:
-            if settings.NEWSLETTER_SEND_VERIFICATION:
-                subscriber.send_verification_email(created, self.request.tenant.schema_name)
+    def post(self, request, *args, **kwargs):
+        form = SubscriberEmailForm(request.POST)
+        if form.is_valid():
+            email_address = form.cleaned_data.get('email')
+            
+            user = User.objects.filter(email=email_address)
+            
+            if user.exists():
+                return redirect("accounts:login")
             else:
-                if email_is_valid(subscriber.email_address):
-                    subscriber.subscribe()
-        return super().form_valid(form)
+                return render(request, "accounts/register.html", {"form": UserCreationForm(initial={"username": email_address})})
+        else:
+            context = {
+                "source": "subscribe",
+                "form": form,
+            }
+            for error in form.errors.values():
+                messages.error(self.request, error)
+            return render(request, self.template_name, context)
 
 
 class ThankyouView(TemplateView):
@@ -104,14 +102,6 @@ class ThankyouView(TemplateView):
         context = super().get_context_data()
         context["send_verification"] = settings.NEWSLETTER_SEND_VERIFICATION
         return context
-
-
-class NewsletterSubscribeResendView(View):
-    def post(self, request, *args, **kwargs):
-        email = request.POST.get("email_address")
-        subscriber = get_object_or_404(Subscriber, email_address=email)
-        subscriber.send_verification_email(created=False)
-        return render(request, "newsletter/thank-you.html")
 
 
 class NewsletterUnsubscribeView(TemplateView):
@@ -141,23 +131,3 @@ class NewsletterUnsubscribeView(TemplateView):
             "form": form,
         }
         return render(request, self.template_name, context)
-
-
-class NewsletterSubscriptionConfirmView(DetailView):
-    template_name = "newsletter/newsletter_subscription_confirm.html"
-    model = Subscriber
-    slug_url_kwarg = 'token'
-    slug_field = 'token'
-
-    def get_queryset(self):
-        return super().get_queryset().filter(verified=False)
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        subscribed = self.object.subscribe()
-
-        context = self.get_context_data(
-            object=self.object, 
-            subscribed=subscribed
-        )
-        return self.render_to_response(context)

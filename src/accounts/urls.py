@@ -28,4 +28,15 @@ urlpatterns = [
         success_url=reverse_lazy("accounts:password_reset_complete"),
     ), name="password_reset"),
     path("password-reset-complete/", auth_views.PasswordResetCompleteView.as_view(template_name="accounts/password_reset_complete.html"), name="password_reset_complete"),
+    
+    
+    path(
+        'resend-verification/',
+        views.ResendVerification.as_view(),
+        name='resend-verification'),
+    path(
+        'subscribe/confirm/<uuid:token>/',
+        views.SubscriptionConfirmView.as_view(),
+        name='subscription_confirm'
+    ),
 ]

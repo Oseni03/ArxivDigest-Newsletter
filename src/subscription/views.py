@@ -10,19 +10,18 @@ from django.contrib.auth.decorators import login_required
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView, ListView
+from django.views.decorators.http import require_POST
 
 from .forms import SubscriptionForm
+from .models import Product
 
 # Create your views here.
-class PricingPage(TemplateView):
+class PricingPage(ListView):
     template_name = "subscription/pricing.html"
+    model = Product 
+    context_object_name = "products"
     
-    def get_context_data(**kwargs):
-        context = super().get_context_data(**kwargs)
-        context["stripe_public_key"] = djstripe_settings.STRIPE_PUBLIC_KEY
-        context["pricing_table_id"] = djstripe_settings.STRIPE_PRICING_TABLE_ID
-        return context
-
 
 @csrf_exempt
 def stripe_config(request):

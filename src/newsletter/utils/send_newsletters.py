@@ -6,13 +6,11 @@ from django.core.mail import EmailMessage, get_connection
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
-from newsletter.app_settings import (
-    NEWSLETTER_EMAIL_BATCH_WAIT,
-    NEWSLETTER_EMAIL_BATCH_SIZE,
-    NEWSLETTER_SITE_BASE_URL,
-)
-from newsletter.models import Newsletter, Subscriber
+from newsletter.models import Newsletter
+
+User = get_user_model()
 
 
 logger = logging.getLogger(__name__)
@@ -26,15 +24,15 @@ class NewsletterEmailSender:
             newsletters=newsletters, respect_schedule=respect_schedule
         )
         # get subscriber email addresses
-        self.subscriber_emails = Subscriber.objects.subscribed().values_list(
-            'email_address', flat=True
+        self.subscriber_emails = User.objects.subscribed().values_list(
+            'email', flat=True
         )
         # Size of each batch to be sent
-        self.batch_size = NEWSLETTER_EMAIL_BATCH_SIZE
+        self.batch_size = settings.NEWSLETTER_EMAIL_BATCH_SIZE
         # list of newsletters that were sent
         self.sent_newsletters = []
         # Waiting time after each batch (in seconds)
-        self.per_batch_wait = NEWSLETTER_EMAIL_BATCH_WAIT
+        self.per_batch_wait = settings.NEWSLETTER_EMAIL_BATCH_WAIT
         # connection to the server
         self.connection = get_connection()
         self.email_host_user = settings.EMAIL_HOST_USER
@@ -72,7 +70,7 @@ class NewsletterEmailSender:
             'issue': issue,
             'post_list': posts,
             'unsubscribe_url': reverse('newsletter:newsletter_unsubscribe'),
-            'site_url': NEWSLETTER_SITE_BASE_URL
+            'site_url': settings.NEWSLETTER_SITE_BASE_URL
         }
 
         html = render_to_string(
@@ -90,7 +88,7 @@ class NewsletterEmailSender:
         """
         Generates email message for an email_address
 
-        :param to_email: subscribers email address
+        :param to_email: user email address
         :param rendered_newsletter: rendered html of the newsletter with subject
         """
         message = EmailMessage(
@@ -110,9 +108,9 @@ class NewsletterEmailSender:
         :param rendered_newsletter: newsletter with html and subject
         """
 
-        # if there is no subscriber then stop iteration
+        # if there is no user then stop iteration
         if len(self.subscriber_emails) == 0:
-            logger.info('No subscriber found.')
+            logger.info('No user found.')
             return
 
         # if there is no batch size specified
