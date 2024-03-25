@@ -32,7 +32,7 @@ def send_subscription_verification_email(verification_url, to_email):
     :param to_email: subscribers email
     """
     context = {
-        'site_url': settings.NEWSLETTER_SITE_BASE_URL,
+        'site_url': settings.DOMAIN_URL,
         'verification_url': verification_url
     }
     
@@ -53,7 +53,7 @@ def send_welcome_email(to_email):
     """
     context = {
         'newsletters': reverse("newsletter:newsletters"),
-        'site_url': settings.NEWSLETTER_SITE_BASE_URL,
+        'site_url': settings.DOMAIN_URL,
     }
     
     email = Email()

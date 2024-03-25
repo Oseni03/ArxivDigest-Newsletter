@@ -2,7 +2,6 @@ import time
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from djstripe import models as djstripe_models
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -12,7 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import HttpResponse
 
-from .forms import SubscriptionForm
 from .models import Product, Payment, Price
 
 from accounts.models import User
@@ -30,7 +28,6 @@ def create_checkout_session(request):
     price = request.POST.get("price")
     domain_url = f"{request.scheme}://{request.get_host()}/"
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    #(customer, _) = djstripe_models.Customer.get_or_create(request.user)
     try:
         session = stripe.checkout.Session.create(
             client_reference_id=request.user.id,
