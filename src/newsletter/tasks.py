@@ -4,8 +4,6 @@ from langchain.document_loaders import DataFrameLoader
 from django.conf import settings
 from newsletter.vectorstore.pgvector_service import PgvectorService
 
-from .utils.send_welcome import send_welcome_email
-
 import os
 # import tqdm
 import json
@@ -127,15 +125,3 @@ def get_new_papers():
     embed_papers(new)
     return f"Saved paper count: {new_paper_count}"
 
-
-@shared_task(name='newsletter.unsnooze')
-def unsnooze(subscriber_id: int):
-    from .models import Subscriber
-    
-    subscriber = Subscriber.objects.get(id=subscriber_id)
-    subscriber.unsnooze()
-
-
-@shared_task(name='newsletter.welcome')
-def send_welcome_email_task(to_email):
-    send_welcome_email(to_email)

@@ -11,7 +11,7 @@ urlpatterns = [
     path("register/", FormView.as_view(
         template_name="accounts/register.html", 
         form_class=UserCreationForm, 
-        success_url=reverse_lazy("accounts:login"), # change success-url to price page
+        success_url=reverse_lazy("accounts:register"), # change success-url to price page
     ), name="register"),
     path("login/", auth_views.LoginView.as_view(template_name="accounts/login.html"), name="login"),
     path("logout/", views.logout, name="logout"),

@@ -48,11 +48,17 @@
       </li>
       <li><a href="#" class="nav-link px-2">About</a></li>
     </ul>
-
+    {% if user.is_authenticated %}
+    <div class="col-md-3 text-end">
+      <a href="{% url 'subscription:billing-portal' %}" class="btn btn-primary me-2">Upgrade</a>
+      <a href="{% url 'accounts:logout' %}" class="btn btn-outline-primary me-2">Sign Out</a>
+    </div>
+    {% else %}
     <div class="col-md-3 text-end">
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subscriptionModal">Subscribe</button>
-      <button type="button" class="btn btn-outline-primary me-2">Login</button>
+      <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary me-2">Login</a>
     </div>
+    {% endif %}
   </header>
 </div>
 
