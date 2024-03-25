@@ -9,7 +9,9 @@ from django.utils import timezone
 from django.conf import settings
 
 from .utils import send_subscription_verification_email
+
 from newsletter.models import PaperTopic
+from subscription.models import Price
 
 
 class CustomUserManager(BaseUserManager):
@@ -44,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=255,
         unique=True,
     )
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -55,8 +57,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     snoozed = models.BooleanField(default=False)
     verification_sent_date = models.DateTimeField(blank=True, null=True)
     
-    # Subscription 
+    # newsletters
     subscribed_topics = models.ManyToManyField(PaperTopic, related_name="users", through="Subscription")
+    
+    # subscription
+    is_paid_subscriber = models.BooleanField(default=False)
+    plan = models.ForeignKey(Price, on_delete=models.SET_NULL, null=True)
+    customer_id = models.CharField(max_length=300, null=True, blank=True)
     
     objects = CustomUserManager()
     USERNAME_FIELD = "email"
@@ -164,6 +171,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             'newsletter:newsletter_subscription_confirm',
             kwargs={'token': self.token}
         )
+    
+    def subscribed_to(self, topic: PaperTopic):
+        return topic in self.subscribed_topics.all()
 
 
 class Subscription(models.Model):
