@@ -65,10 +65,10 @@ def user_verification(sender, instance, created, **kwargs):
             instance.send_verification_email(created, instance.request.tenant.schema_name)
         else:
             instance.verified = True
-            instance.subscribed = True
+            instance.is_active = True
             instance.save()
     
-            signals.subscribed.send(
+            subscribed.send(
                 sender=instance.__class__, instance=instance
             )
             send_welcome_email(instance.email)

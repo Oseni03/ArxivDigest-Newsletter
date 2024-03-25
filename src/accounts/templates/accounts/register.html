@@ -22,17 +22,14 @@ Sign up
                         </div>
                     {% endfor %}
                     {% endif %}
-                    <form action="{% url 'accounts:login' %}" method="post">
+                    <form action="{% url 'accounts:register' %}" method="post">
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            {% render_field form.username class="form-control" placeholder="Enter email address" %}
+                            {% render_field form.email class="form-control" placeholder="Enter email address" %}
                         </div>
                         <div class="mb-3">
-                            {% render_field form.password1 class="form-control" placeholder="Enter password" %}
-                        </div>
-                        <div class="mb-3">
-                            {% render_field form.password2 class="form-control" placeholder="Confirm password" %}
+                            {% render_field form.password class="form-control" placeholder="Enter password" %}
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg rounded rounded-5">Sign up</button>
