@@ -1,0 +1,5 @@
+Welcome to ArxivDigest
+
+To manage your newsletter list; copy and paste the link below into your browser
+
+{{ site_url }}{{ newsletters }}

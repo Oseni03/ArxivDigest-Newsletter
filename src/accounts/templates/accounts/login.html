@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load socialaccount %}
 
 {% block title %}
 Sign in
@@ -12,7 +13,7 @@ Sign in
         <div class="col col-md-9 col-lg-6">
             <div class="card py-4 px-md-3 shadow">
                 <div class="card-body">
-                    <h4 class='card-title fw-bold'>Sign in</h4>
+                    <h4 class='card-title fw-bold mb-3'>Sign in</h4>
                     <h6 class="card-subtitle mb-4 text-body-secondary">Stay updated on the latest research papers.</h6>
                     {% if form.errors %}
                         <div id="messages" class="alert alert-info alert-dismissible fade show my-3 d-flex align-items-center" role="alert">
@@ -36,7 +37,7 @@ Sign in
                             <p class="text-muted">or</p>
                         </div>
                         <div class="d-grid">
-                            <a class="btn btn-outline-danger btn-lg rounded rounded-5 mb-3">
+                            <a class="btn btn-outline-danger btn-lg rounded rounded-5 mb-3" href="{% provider_login_url "google" process="login" %}">
                                 <span class="me-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-google" viewBox="0 0 16 16">
                                         <path d="M15.545 6.558a9.4 9.4 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.7 7.7 0 0 1 5.352 2.082l-2.284 2.284A4.35 4.35 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.8 4.8 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.7 3.7 0 0 0 1.599-2.431H8v-3.08z"/>
@@ -44,6 +45,7 @@ Sign in
                                 </span>
                                 Sign in with Google
                             </a>
+                            {% comment %}
                             <a class="btn btn-outline-primary btn-lg rounded rounded-5">
                                 <span class="me-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
@@ -52,6 +54,7 @@ Sign in
                                 </span>
                                 Sign in with Facebook
                             </a>
+                            {% endcomment %}
                         </div>
                     </form>
                 </div>

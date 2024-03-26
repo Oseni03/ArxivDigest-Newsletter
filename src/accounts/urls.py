@@ -2,13 +2,14 @@ from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
 
 from . import views
+from .decorators import login_not_required
 
 app_name = "accounts"
 
 urlpatterns = [
-    path("register/", views.RegisterView.as_view(), name="register"),
-    path("login/", auth_views.LoginView.as_view(template_name="accounts/login.html"), name="login"),
-    path("logout/", views.logout, name="logout"),
+    path("register/", login_not_required(views.RegisterView.as_view()), name="register"),
+    path("login/", login_not_required(auth_views.LoginView.as_view(template_name="accounts/login.html")), name="login"),
+    path("logout/", views.logout_view, name="logout"),
     path("reset-password/", auth_views.PasswordResetView.as_view(
         template_name="accounts/reset_password.html",
         email_template_name="accounts/emails/email_template_name.html",
@@ -22,8 +23,6 @@ urlpatterns = [
         success_url=reverse_lazy("accounts:password_reset_complete"),
     ), name="password_reset"),
     path("password-reset-complete/", auth_views.PasswordResetCompleteView.as_view(template_name="accounts/password_reset_complete.html"), name="password_reset_complete"),
-    
-    
     path(
         'resend-verification/',
         views.ResendVerification.as_view(),
