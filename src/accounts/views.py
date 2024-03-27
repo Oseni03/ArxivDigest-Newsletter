@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.contrib.auth import login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic import DetailView, View, FormView
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import User
 from .forms import UserCreationForm
+from newsletter.forms import SubscriberEmailForm
 
 # Create your views here.
 class RegisterView(View):
@@ -43,7 +45,7 @@ class ResendVerification(View):
 
 
 class SubscriptionConfirmView(DetailView):
-    template_name = "accounts/newsletter_subscription_confirm.html"
+    template_name = "accounts/subscription_confirm.html"
     model = User
     slug_url_kwarg = 'token'
     slug_field = 'token'
@@ -60,3 +62,21 @@ class SubscriptionConfirmView(DetailView):
             subscribed=subscribed
         )
         return self.render_to_response(context)
+
+
+class UnsubscribeView(View):
+    template_name = "accounts/unsubscribe.html"
+    
+    def get(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(User, id=user_id)
+        context = {
+            "user": user,
+            "unsubscribe": True,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(User, id=user_id)
+        user.unsubscribe()
+        return render(request, "accounts/unsubscribe_successful.html")
+
