@@ -102,32 +102,3 @@ class ThankyouView(TemplateView):
         context = super().get_context_data()
         context["send_verification"] = settings.NEWSLETTER_SEND_VERIFICATION
         return context
-
-
-class NewsletterUnsubscribeView(TemplateView):
-    template_name = "newsletter/newsletter_unsubscribe.html"
-    
-    def get_context_data(self):
-        context = super().get_context_data()
-        context["form"] = SubscriberEmailForm()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        form = SubscriberEmailForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-            subscriber = Subscriber.objects.filter(
-                subscribed=True,
-                email_address=email
-            )
-    
-            if subscriber.exists():
-                subscriber.first().unsubscribe()
-                return render(request, "newsletter/newsletter_unsubscribed.html")
-            else:
-                messages.info(request, 'Subscriber with this e-mail address does not exist.')
-                return redirect(reverse("newsletter:home"))
-        context = {
-            "form": form,
-        }
-        return render(request, self.template_name, context)

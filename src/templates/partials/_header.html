@@ -34,8 +34,8 @@
     </div>
 
     <ul class="nav nav-pill col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-      <li><a href="#" class="nav-link active px-2 link-secondary">Home</a></li>
-      <li><a href="#" class="nav-link px-2">Features</a></li>
+      <li><a href="/" class="nav-link active px-2 link-secondary">Home</a></li>
+      <li><a href="{% url 'newsletter:newsletters' %}" class="nav-link px-2">Newsletters</a></li>
       <li><a href="{% url 'subscription:pricing' %}" class="nav-link px-2">Pricing</a></li>
       <li class="dropdown">
         <a href="#" class="nav-link px-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
@@ -50,8 +50,12 @@
     </ul>
     {% if user.is_authenticated %}
     <div class="col-md-3 text-end">
-      <a href="{% url 'subscription:billing-portal' %}" class="btn btn-primary me-2">Upgrade</a>
-      <a href="{% url 'accounts:logout' %}" class="btn btn-outline-primary me-2">Sign Out</a>
+        {% if user.is_paid_subscriber %}
+        <a href="{% url 'subscription:billing-portal' %}" class="btn btn-primary me-2">Upgrade</a>
+        {% else %}
+        <a href="{% url 'subscription:pricing' %}" class="btn btn-primary me-2">Upgrade</a>
+        {% endif %}
+        <a href="{% url 'accounts:logout' %}" class="btn btn-outline-primary me-2">Sign Out</a>
     </div>
     {% else %}
     <div class="col-md-3 text-end">

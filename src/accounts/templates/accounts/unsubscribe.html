@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Unsubscribe{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <h2>Update your email preferences:</h2>
+            <p class="mb-3">We hear you want to unsubscribe. Well, before you send us to the dog house(oh nooooo!), is there any way we can just limit the kinds of email we send ya? So you only hear about things that get your tail waggin'.</p>
+            
+            {% include "newsletter/partials/_newsletters_form.html" %}
+            <a href="{% url 'newsletter:newsletters' %}" class="btn btn-primary btn-lg rounded-0">Done</a>
+            <hr class="my-3">
+            <p class="mt-5">
+                No thanks, unsubscribe me from all emails.
+            </p>
+            <form action="." method="POST">
+                {% csrf_token %}
+                <button class="btn btn-outline-primary rounded-0" type="submit">Unsubscribe</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
