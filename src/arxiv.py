@@ -1,5 +1,4 @@
 import json
-import pprint
 import requests
 from bs4 import BeautifulSoup 
 from urllib.parse import urljoin
@@ -37,10 +36,11 @@ def get_fields(url="https://www.arxiv.org"):
         subfields_list = []
         for f in subfields:
             sub = f.select_one("a")
-            main_url = urljoin(url, sub.get("href"))
+            abbrv = f.select_one("strong").get("id")
+            main_url = urljoin(url, f"/archive/{abbrv}")
             subfields_list.append({
                 "name": sub.text,
-                "abbrv": f.select_one("strong").get("id"),
+                "abbrv": abbrv,
                 "sub_fields": get_subsubfields(main_url)
             })
 
@@ -53,7 +53,12 @@ def get_fields(url="https://www.arxiv.org"):
 
 
 
-fields = get_fields()
-with open("data/arxiv.json", "w") as file:
-    json_data = json.dumps(fields, indent=4)
-    file.write(json_data)
+if __name__ == "__main__":
+    fields = get_fields()
+    with open("./src/arxiv.json", "w") as file:
+        json_data = json.dumps(fields, indent=4)
+        print(json_data)
+        file.write(json_data)
+        
+        # json.dump(fields, file)
+    
