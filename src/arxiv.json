@@ -386,7 +386,168 @@
             {
                 "name": "Computing Research Repository",
                 "abbrv": "cs",
-                "sub_fields": []
+                "sub_fields": [
+                    {
+                        "name": "Artificial Intelligence",
+                        "abbrv": "cs.AI"
+                    },
+                    {
+                        "name": "Computation and Language",
+                        "abbrv": "cs.CL"
+                    },
+                    {
+                        "name": "Computational Complexity",
+                        "abbrv": "cs.CC"
+                    },
+                    {
+                        "name": "Computational Engineering, Finance, and Science",
+                        "abbrv": "cs.CE"
+                    },
+                    {
+                        "name": "Computational Geometry",
+                        "abbrv": "cs.CG"
+                    },
+                    {
+                        "name": "Computer Science and Game Theory",
+                        "abbrv": "cs.GT"
+                    },
+                    {
+                        "name": "Computer Vision and Pattern Recognition",
+                        "abbrv": "cs.CV"
+                    },
+                    {
+                        "name": "Computers and Society",
+                        "abbrv": "cs.CY"
+                    },
+                    {
+                        "name": "Cryptography and Security",
+                        "abbrv": "cs.CR"
+                    },
+                    {
+                        "name": "Data Structures and Algorithms",
+                        "abbrv": "cs.DS"
+                    },
+                    {
+                        "name": "Databases",
+                        "abbrv": "cs.DB"
+                    },
+                    {
+                        "name": "Digital Libraries",
+                        "abbrv": "cs.DL"
+                    },
+                    {
+                        "name": "Discrete Mathematics",
+                        "abbrv": "cs.DM"
+                    },
+                    {
+                        "name": "Distributed, Parallel, and Cluster Computing",
+                        "abbrv": "cs.DC"
+                    },
+                    {
+                        "name": "Emerging Technologies",
+                        "abbrv": "cs.ET"
+                    },
+                    {
+                        "name": "Formal Languages and Automata Theory",
+                        "abbrv": "cs.FL"
+                    },
+                    {
+                        "name": "General Literature",
+                        "abbrv": "cs.GL"
+                    },
+                    {
+                        "name": "Graphics",
+                        "abbrv": "cs.GR"
+                    },
+                    {
+                        "name": "Hardware Architecture",
+                        "abbrv": "cs.AR"
+                    },
+                    {
+                        "name": "Human-Computer Interaction",
+                        "abbrv": "cs.HC"
+                    },
+                    {
+                        "name": "Information Retrieval",
+                        "abbrv": "cs.IR"
+                    },
+                    {
+                        "name": "Information Theory",
+                        "abbrv": "cs.IT"
+                    },
+                    {
+                        "name": "Logic in Computer Science",
+                        "abbrv": "cs.LO"
+                    },
+                    {
+                        "name": "Machine Learning",
+                        "abbrv": "cs.LG"
+                    },
+                    {
+                        "name": "Mathematical Software",
+                        "abbrv": "cs.MS"
+                    },
+                    {
+                        "name": "Multiagent Systems",
+                        "abbrv": "cs.MA"
+                    },
+                    {
+                        "name": "Multimedia",
+                        "abbrv": "cs.MM"
+                    },
+                    {
+                        "name": "Networking and Internet Architecture",
+                        "abbrv": "cs.NI"
+                    },
+                    {
+                        "name": "Neural and Evolutionary Computing",
+                        "abbrv": "cs.NE"
+                    },
+                    {
+                        "name": "Numerical Analysis",
+                        "abbrv": "cs.NA"
+                    },
+                    {
+                        "name": "Operating Systems",
+                        "abbrv": "cs.OS"
+                    },
+                    {
+                        "name": "Other Computer Science",
+                        "abbrv": "cs.OH"
+                    },
+                    {
+                        "name": "Performance",
+                        "abbrv": "cs.PF"
+                    },
+                    {
+                        "name": "Programming Languages",
+                        "abbrv": "cs.PL"
+                    },
+                    {
+                        "name": "Robotics",
+                        "abbrv": "cs.RO"
+                    },
+                    {
+                        "name": "Social and Information Networks",
+                        "abbrv": "cs.SI"
+                    },
+                    {
+                        "name": "Software Engineering",
+                        "abbrv": "cs.SE"
+                    },
+                    {
+                        "name": "Sound",
+                        "abbrv": "cs.SD"
+                    },
+                    {
+                        "name": "Symbolic Computation",
+                        "abbrv": "cs.SC"
+                    },
+                    {
+                        "name": "Systems and Control",
+                        "abbrv": "cs.SY"
+                    }
+                ]
             }
         ]
     },
