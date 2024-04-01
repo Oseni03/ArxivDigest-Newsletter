@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import reverse
+from django.urls import reverse_lazy
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
@@ -40,9 +40,9 @@ def send_subscription_verification_email(verification_url, to_email):
     email = Email()
     email.send(
         to_email, context, 
-        'newsletter/email/email_verification_subject.txt',
-        'newsletter/email/email_verification.txt',
-        'newsletter/email/email_verification.html',
+        'accounts/emails/email_verification_subject.txt',
+        'accounts/emails/email_verification.txt',
+        'accounts/emails/email_verification.html',
     )
 
 
@@ -53,14 +53,14 @@ def send_welcome_email(to_email):
     :param to_email: subscribers email
     """
     context = {
-        'newsletters': reverse("newsletter:newsletters"),
+        'newsletters': reverse_lazy("newsletter:newsletters"),
         'site_url': settings.DOMAIN_URL,
     }
     
     email = Email()
     email.send(
         to_email, context, 
-        'newsletter/email/email_welcome_subject.txt',
-        'newsletter/email/email_welcome.txt',
-        'newsletter/email/email_welcome.html',
+        'accounts/emails/email_welcome_subject.txt',
+        'accounts/emails/email_welcome.txt',
+        'accounts/emails/email_welcome.html',
     )

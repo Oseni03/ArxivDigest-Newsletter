@@ -54,7 +54,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Subscriber 
     token = models.CharField(max_length=128, unique=True, default=uuid.uuid4)
     verified = models.BooleanField(default=False)
-    snoozed = models.BooleanField(default=False)
     verification_sent_date = models.DateTimeField(blank=True, null=True)
     
     # newsletters
@@ -95,7 +94,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def token_expired(self):
         if not self.verification_sent_date:
             return True
-
+    
         expiration_date = (
             self.verification_sent_date + timezone.timedelta(
                 days=settings.NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
@@ -108,11 +107,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         while self.__class__.objects.filter(token=unique_token).exists():
             unique_token = str(uuid.uuid4())
-
+        
         self.token = unique_token
         self.save()
     
     def unsubscribe(self):
+        from . import signals
+        
         if self.is_active:
             self.is_active = False
             self.verified = False
@@ -123,28 +124,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             )
 
             return True
-
-    def snooze(self):
-        if not self.snoozed:
-            self.snoozed = True
-            self.save()
-
-            signals.snoozed.send(
-                sender=self.__class__, instance=self
-            )
-        return True
-    
-    def unsnooze(self):
-        if self.snoozed:
-            self.snoozed = False
-            self.save()
-
-            signals.unsnoozed.send(
-                sender=self.__class__, instance=self
-            )
-        return True
     
     def send_verification_email(self, created):
+        from . import signals
+        
         minutes_before = timezone.now() - timezone.timedelta(minutes=5)
         sent_date = self.verification_sent_date
 

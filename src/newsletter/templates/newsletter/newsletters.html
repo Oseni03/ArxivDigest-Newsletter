@@ -13,6 +13,20 @@ Newsletters and Alerts
             <h5 class="text-muted">Get the best of Arxiv in your inbox</h5>
         </div>
         
+        {% if user.is_authenticated %}
+        <div class="my-5">
+          <div class="position-relative p-3 px-md-5 text-center text-muted bg-body border border-dashed rounded-5">
+            <h1 class="text-body-emphasis mt-5">Custom Alert</h1>
+            <p class="col-lg-6 mx-auto mb-4">
+              This faded back jumbotron is useful for placeholder content. It's also a great way to add a bit of context to a page or section when no content is available and to encourage visitors to take a specific action.
+            </p>
+            <button class="btn btn-primary px-5 mb-5 btn-lg" type="button">
+              New alert
+            </button>
+          </div>
+        </div>
+        {% endif %}
+        
         {% include 'newsletter/partials/_newsletters_form.html' %}
     </div>
     <div class="d-flex justify-content-center">

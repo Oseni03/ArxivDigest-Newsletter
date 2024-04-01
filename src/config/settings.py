@@ -1,21 +1,31 @@
 import os
+import environ
 from pathlib import Path
-from django.urls import reverse_lazy
 from django.contrib import messages
+from django.urls import reverse_lazy
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False),
+    WEBHOOK_SECRET=(str, "whsec_xxx")
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-81yp_bk9r5ifu+$&t@ok=d#j+9f#jm9=strz^1v-@e#jkc+=&_'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = []
 
-DOMAIN_URL = "http://localhost:8000/"
+DOMAIN_URL = env("DOMAIN_URL")
 
 # Application definition
 
@@ -36,6 +46,12 @@ INSTALLED_APPS = [
     "newsletter",
     "accounts",
     "subscription",
+    
+    # django-allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +62,41 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    'allauth.account.middleware.AccountMiddleware',
 ]
+
+# Provider specific settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': env("GOOGLE_CLIENT_ID"),
+            'secret': env("GOOGLE_SECRET_KEY"),
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+# SOCIALACCOUNT_FORMS = {'signup': 'accounts.forms.UserCreationForm'}
 
 ROOT_URLCONF = 'config.urls'
 
@@ -99,6 +149,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Authentication
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    # 'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -143,7 +202,7 @@ EMAIL_HOST_USER = "example@gmail.com"
 #-----------------------------------
 # REDIS DEFINITION 
 #-----------------------------------
-REDIS_URL = f'{os.environ.get("REDIS_URL", default="redis://127.0.0.1:6379")}/{0}'
+REDIS_URL = f'{env("REDIS_URL", default="redis://127.0.0.1:6379")}/{0}'
 
 
 #-----------------------------------
@@ -180,7 +239,7 @@ NEWSLETTER_SEND_VERIFICATION = False
 
 
 # STRIPE CONFIGURATION
-STRIPE_PUBLIC_KEY = "pk_test_51LkTclEuBM4N6BqzT03vDUYZom2Ndznfo8GK3LpR3fP9UPPhvYXoxVD5RKjHIKn5OaftnLHMsEeF6xys8xKJCoS300f4ETu5GZ"
-STRIPE_SECRET_KEY = "sk_test_51LkTclEuBM4N6BqzqXeh2JulBstWuAvM7nbQrkkojnCLulExtpLNosMuPPBHh5PWSkZayMPAopWFWBXJ5YA5fHqP00Z5WgEn4j"
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 STRIPE_LIVE_MODE = False
-WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "whsec_xxx")
+WEBHOOK_SECRET = env("WEBHOOK_SECRET")

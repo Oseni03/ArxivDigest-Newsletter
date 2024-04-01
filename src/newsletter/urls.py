@@ -22,9 +22,4 @@ urlpatterns = [
         views.NewsletterSubscribeView.as_view(),
         name='newsletter_subscribe'),
     path("thank-you/", views.ThankyouView.as_view(), name="thank-you"),
-    path(
-        'unsubscribe/',
-        views.NewsletterUnsubscribeView.as_view(),
-        name='newsletter_unsubscribe'
-    ),
 ]
