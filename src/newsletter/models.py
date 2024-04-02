@@ -33,22 +33,18 @@ class PaperTopic(MPTTModel):
 class Paper(models.Model):
     topics = models.ManyToManyField(PaperTopic, related_name='papers')
     title = models.CharField(max_length=255)
-    paper_number = models.PositiveIntegerField()
-    authors = models.CharField(max_length=255)
-    main_page = models.URLField()
-    pdf_url = models.URLField()
+    authors = models.CharField(max_length=300)
+    subjects = models.CharField(max_length=300, null=True)
+    main_page = models.URLField(unique=True)
+    pdf_url = models.URLField(unique=True)
     is_visible = models.BooleanField(default=True)
     abstract = models.TextField()
     summary = models.TextField(null=True)
-    published_at = models.DateField()
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = PaperQuerySet.as_manager()
-
-    class Meta:
-        ordering = ['-published_at']
 
     def __str__(self):
         return str(self.title)
