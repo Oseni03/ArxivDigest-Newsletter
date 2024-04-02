@@ -1,9 +1,17 @@
 import json
+import os
+import tqdm
+import json
+import pytz
+import datetime
 import requests
+import threading
+import urllib.request
 from bs4 import BeautifulSoup 
 from urllib.parse import urljoin
+from django.db import transaction
 
-from newsletter.models import PaperTopic
+from newsletter.models import PaperTopic, Paper
 
 
 def get_subsubfields(url="https://arxiv.org/archive/astro-ph"):
@@ -26,7 +34,7 @@ def get_subsubfields(url="https://arxiv.org/archive/astro-ph"):
     return subsubfields_list
 
 
-def get_fields(url="https://www.arxiv.org"):
+def get_fields(url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_topics.json"):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
     
@@ -51,6 +59,9 @@ def get_fields(url="https://www.arxiv.org"):
             "sub_fields": subfields_list,
         })
     
+    with open(path, "w") as file:
+        json_data = json.dumps(fields_list, indent=4)
+        file.write(json_data)
     return fields_list
 
 
@@ -66,24 +77,12 @@ def load_fields(fields: list, parent_field: PaperTopic = None):
             load_fields(sub_fields, topic)
 
 
-# encoding: utf-8
-import os
-import tqdm
-from bs4 import BeautifulSoup as bs
-import urllib.request
-import json
-import datetime
-import pytz
-import requests
-from pypdf import PdfReader, errors
-
-
-def _download_new_papers(field_abbr):
+def _download_new_papers(field_abbr, path):
     NEW_SUB_URL = (
         f"https://arxiv.org/list/{field_abbr}/new"  # https://arxiv.org/list/cs/new
     )
     page = urllib.request.urlopen(NEW_SUB_URL)
-    soup = bs(page)
+    soup = BeautifulSoup(page, "html.parser")
     content = soup.body.find("div", {"id": "content"})
 
     # find the first h3 element in content
@@ -125,27 +124,83 @@ def _download_new_papers(field_abbr):
             dd_list[i].find("p", {"class": "mathjax"}).text.replace("\n", " ").strip()
         )
         new_paper_list.append(paper)
-
+    
     #  check if ./data exist, if not, create it
-    if not os.path.exists("./data"):
-        os.makedirs("./data")
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     # save new_paper_list to a jsonl file, with each line as the element of a dictionary
     date = datetime.date.fromtimestamp(
         datetime.datetime.now(tz=pytz.timezone("America/New_York")).timestamp()
     )
     date = date.strftime("%a, %d %b %y")
-    with open(f"./data/{field_abbr}_{date}.jsonl", "w") as f:
-        for paper in new_paper_list:
-            f.write(json.dumps(paper) + "\n")
+    with open(f"{path}/{field_abbr}_{date}.jsonl", "w") as file:
+        json_data = json.dumps(new_paper_list, indent=4)
+        file.write(json_data)
+    return new_paper_list
+
+
+def load_papers(result, topic_id):
+    # result = _download_new_papers(topic_abbrv)
+    new_papers = []
+    with transaction.atomic():
+        for paper_data in result:
+            # Create or get the Paper object within an atomic transaction
+            paper, _ = Paper.objects.get_or_create(
+                authors=paper_data["authors"],
+                title=paper_data["title"],
+                main_page=paper_data["main_page"],
+                pdf_url=paper_data["pdf"],
+                abstract=paper_data["abstract"]
+            )
+            # Add the Paper object to the list of new papers
+            new_papers.append(paper)
+            # Assign the topic to the Paper object
+            paper.topics.add(topic_id)
+            paper.save()
+        
+    return result
+
+
+def get_papers(limit=None, path="newsletter/utils/data/papers"):
+    
+    results = []
+
+    if not os.path.exists(path):
+        topics = PaperTopic.objects.all()
+        threads = []
+
+        for topic in topics:
+            if topic.abbrv:
+                date = datetime.date.fromtimestamp(
+                    datetime.datetime.now(tz=pytz.timezone("America/New_York")).timestamp()
+                )
+                date = date.strftime("%a, %d %b %y")
+                if not os.path.exists(f"{path}/{topic.abbrv}_{date}.jsonl"):
+                    result = _download_new_papers(topic.abbrv, path)
+                else:
+                    result = []
+                    with open(f"{path}/{topic.abbrv}_{date}.jsonl", "r") as f:
+                        for i, line in enumerate(f.readlines()):
+                            if limit and i == limit:
+                                return result
+                            result.append(json.loads(line))
+                
+                thread = threading.Thread(target=load_papers, args=(result, topic.id))
+                threads.append(thread)
+                thread.start()
+
+        for thread in threads:
+            thread.join()
+
+    return results
 
 
 
 if __name__ == "__main__":
-    fields = get_fields()
-    # with open("./src/arxiv.json", "w") as file:
-    #     json_data = json.dumps(fields, indent=4)
-    #     print(json_data)
-    #     file.write(json_data)
+    # fields = get_fields()
     
-    load_fields(fields)
+    # load_fields(fields)
+    
+    papers = get_papers("cs.AI")
+    print(papers)
