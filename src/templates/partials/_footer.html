@@ -6,7 +6,7 @@
     <div class="row">
 
       <div class="col-md-5 mb-3">
-        <form action="" method="post">
+        <form action="{% url 'newsletter:newsletter_subscribe' %}" method="post">
           {% csrf_token %}
           <h5>Subscribe to our newsletter</h5>
           <p>Monthly digest of what's new and exciting from us.</p>

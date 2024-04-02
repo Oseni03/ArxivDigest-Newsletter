@@ -27,9 +27,19 @@ Newsletters and Alerts
         </div>
         {% endif %}
         
-        {% include 'newsletter/partials/_newsletters_form.html' %}
+        {% include 'newsletter/partials/_newsletter_list.html' %}
     </div>
     <div class="d-flex justify-content-center">
         <a href="#" class="btn btn-outline-primary rounded-0">Back to top</a>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $('.collapse').on('shown.bs.collapse', function(){
+        $(this).closest("div").find(".bi-plus-circle-fill").removeClass("bi-plus-circle-fill").addClass("bi-dash-circle-fill");
+    }).on('hidden.bs.collapse', function(){
+        $(this).closest("div").find(".bi-dash-circle-fill").removeClass("bi-dash-circle-fill").addClass("bi-plus-circle-fill");
+    });
+</script>
 {% endblock %}
