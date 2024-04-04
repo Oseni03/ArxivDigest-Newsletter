@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "mptt",
     'django_celery_beat',
     'django_celery_results',
+    "django_htmx",
     
     "newsletter",
     "accounts",
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
     'allauth.account.middleware.AccountMiddleware',
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 # Provider specific settings

@@ -141,8 +141,6 @@ def _download_new_papers(field_abbr, path):
 
 
 def load_papers(result, topic_id):
-    # result = _download_new_papers(topic_abbrv)
-    new_papers = []
     with transaction.atomic():
         for paper_data in result:
             # Create or get the Paper object within an atomic transaction
@@ -153,8 +151,6 @@ def load_papers(result, topic_id):
                 pdf_url=paper_data["pdf"],
                 abstract=paper_data["abstract"]
             )
-            # Add the Paper object to the list of new papers
-            new_papers.append(paper)
             # Assign the topic to the Paper object
             paper.topics.add(topic_id)
             paper.save()
