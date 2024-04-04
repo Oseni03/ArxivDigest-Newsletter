@@ -45,7 +45,10 @@ class Paper(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     objects = PaperQuerySet.as_manager()
-
+    
+    class Meta:
+        ordering = ['-created_at']
+        
     def __str__(self):
         return str(self.title)
     
