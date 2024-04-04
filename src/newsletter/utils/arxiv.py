@@ -123,6 +123,7 @@ def _download_new_papers(field_abbr, path):
         paper["abstract"] = (
             dd_list[i].find("p", {"class": "mathjax"}).text.replace("\n", " ").strip()
         )
+        paper["paper_number"] = paper_number
         new_paper_list.append(paper)
     
     #  check if ./data exist, if not, create it
@@ -149,7 +150,8 @@ def load_papers(result, topic_id):
                 title=paper_data["title"],
                 main_page=paper_data["main_page"],
                 pdf_url=paper_data["pdf"],
-                abstract=paper_data["abstract"]
+                abstract=paper_data["abstract"],
+                paper_number=paper_data["paper_number"],
             )
             # Assign the topic to the Paper object
             paper.topics.add(topic_id)
@@ -162,32 +164,32 @@ def get_papers(limit=None, path="newsletter/utils/data/papers"):
     
     results = []
 
-    if not os.path.exists(path):
-        topics = PaperTopic.objects.all()
-        threads = []
+    topics = PaperTopic.objects.all()
+    threads = []
+    
+    for topic in topics:
+        if topic.abbrv:
+            date = datetime.date.fromtimestamp(
+                datetime.datetime.now(tz=pytz.timezone("America/New_York")).timestamp()
+            )
+            date = date.strftime("%a, %d %b %y")
+            if not os.path.exists(f"{path}/{topic.abbrv}_{date}.jsonl"):
+                result = _download_new_papers(topic.abbrv, path)
+            else:
+                result = []
+                with open(f"{path}/{topic.abbrv}_{date}.jsonl", "r") as f:
+                    result = json.load(f)
+                    # for i, line in enumerate(f.readlines()):
+                    #     if limit and i == limit:
+                    #         return result
+                    #     result.append(json.loads(line))
+            
+            thread = threading.Thread(target=load_papers, args=(result, topic.id))
+            threads.append(thread)
+            thread.start()
 
-        for topic in topics:
-            if topic.abbrv:
-                date = datetime.date.fromtimestamp(
-                    datetime.datetime.now(tz=pytz.timezone("America/New_York")).timestamp()
-                )
-                date = date.strftime("%a, %d %b %y")
-                if not os.path.exists(f"{path}/{topic.abbrv}_{date}.jsonl"):
-                    result = _download_new_papers(topic.abbrv, path)
-                else:
-                    result = []
-                    with open(f"{path}/{topic.abbrv}_{date}.jsonl", "r") as f:
-                        for i, line in enumerate(f.readlines()):
-                            if limit and i == limit:
-                                return result
-                            result.append(json.loads(line))
-                
-                thread = threading.Thread(target=load_papers, args=(result, topic.id))
-                threads.append(thread)
-                thread.start()
-
-        for thread in threads:
-            thread.join()
+    for thread in threads:
+        thread.join()
 
     return results
 

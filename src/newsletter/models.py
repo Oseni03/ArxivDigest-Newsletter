@@ -34,6 +34,7 @@ class Paper(models.Model):
     topics = models.ManyToManyField(PaperTopic, related_name='papers')
     title = models.CharField(max_length=255)
     authors = models.CharField(max_length=300)
+    paper_number = models.CharField(max_length=15, unique=True)
     subjects = models.CharField(max_length=300, null=True)
     main_page = models.URLField(unique=True)
     pdf_url = models.URLField(unique=True)
