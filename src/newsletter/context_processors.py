@@ -3,6 +3,6 @@ from .forms import SubscriberEmailForm
 
 def newsletter(request):
     return {
-        "topics": PaperTopic.objects.parents(),
+        "topics": PaperTopic.objects.prefetch_related("children").parents(),
         "subscription_form": SubscriberEmailForm(),
     }

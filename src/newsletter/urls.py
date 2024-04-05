@@ -8,7 +8,7 @@ urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
     path("topics/<str:abbrv>/", views.TopicDetailView.as_view(), name="topic_detail"),
     path(
-        "topics/<int:paper_number>/",
+        "abs/<str:paper_number>/",
         views.PaperDetailView.as_view(),
         name="paper_detail",
     ),

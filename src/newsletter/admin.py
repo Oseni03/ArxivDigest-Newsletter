@@ -2,6 +2,7 @@ from django.contrib import admin, messages
 
 from .models import Newsletter, Paper, PaperTopic
 from newsletter.utils.send_newsletters import send_email_newsletter
+from mptt.admin import MPTTModelAdmin
 
 
 class NewsletterAdmin(admin.ModelAdmin):
@@ -65,11 +66,10 @@ class PaperAdmin(admin.ModelAdmin):
     make_post_visible.short_description = 'Make posts visible'
 
 
-class PaperTopicAdmin(admin.ModelAdmin):
-    list_display = ('name', 'abbrv',)
-    search_fields = ('name',)
+class CustomMPTTModelAdmin(MPTTModelAdmin):
+    mptt_level_indent = 20
 
 
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(Paper)
-admin.site.register(PaperTopic, PaperTopicAdmin)
+admin.site.register(PaperTopic, CustomMPTTModelAdmin)

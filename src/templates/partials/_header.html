@@ -1,16 +1,23 @@
-{% load static %}
-{% load widget_tweaks %} 
+{% load static %} {% load widget_tweaks %} {% load mptt_tags %}
 
 <div class="modal" id="subscriptionModal" tabindex="-1">
   <div class="modal-dialog modal-md-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-body text-center p-5">
         <h1 class="text-primary">Subscribe To Our Newsletter</h1>
-        <p class="my-2">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus quia dignissimos excepturi praesentium, repudiandae voluptates ipsum culpa illo hic dolor.</p>
-        <form method="post" action="{% url 'newsletter:newsletter_subscribe' %}">
+        <p class="my-2">
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus quia
+          dignissimos excepturi praesentium, repudiandae voluptates ipsum culpa
+          illo hic dolor.
+        </p>
+        <form
+          method="post"
+          action="{% url 'newsletter:newsletter_subscribe' %}"
+        >
           {% csrf_token %}
           <div class="input-group mb-3">
-            {% render_field subscription_form.email class="form-control" placeholder="Email address" aria-describedby="button-addon2" %}
+            {% render_field subscription_form.email class="form-control"
+            placeholder="Email address" aria-describedby="button-addon2" %}
             <button
               class="btn btn-primary btn-md-lg"
               type="submit"
@@ -26,162 +33,116 @@
 </div>
 
 <div class="container-fluid">
-  <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between px-sm-0 py-3 p-md-3 mb-4 border-bottom">
+  <header
+    class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between px-sm-0 py-3 p-md-3 mb-4 border-bottom"
+  >
     <div class="col-md-3 mb-2 mb-md-0">
       <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
-        <svg class="bi" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+        <svg
+          class="bi"
+          width="40"
+          height="32"
+          role="img"
+          aria-label="Bootstrap"
+        >
+          <use xlink:href="#bootstrap"></use>
+        </svg>
       </a>
     </div>
 
-    <ul class="nav nav-pill col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+    <ul
+      class="nav nav-pill col-12 col-md-auto mb-2 justify-content-center mb-md-0"
+    >
       <li><a href="/" class="nav-link active px-2 link-secondary">Home</a></li>
-      <li><a href="{% url 'newsletter:newsletters' %}" class="nav-link px-2">Newsletters</a></li>
-      <li><a href="{% url 'subscription:pricing' %}" class="nav-link px-2">Pricing</a></li>
+      <li>
+        <a href="{% url 'newsletter:newsletters' %}" class="nav-link px-2"
+          >Newsletters</a
+        >
+      </li>
+      <li>
+        <a href="{% url 'subscription:pricing' %}" class="nav-link px-2"
+          >Pricing</a
+        >
+      </li>
       <li class="dropdown">
-        <a href="#" class="nav-link px-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
+        <a
+          href="#"
+          class="nav-link px-2 dropdown-toggle"
+          href="#"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          >Category</a
+        >
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another action</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
-          </ul>
+          {% for topic in topics %} 
+		  {% if not topic.is_leaf_node %}
+          <li>
+            <a class="dropdown-item" href="#"> {{ topic.name }} &raquo; </a>
+            <ul class="submenu dropdown-menu">
+              {% for subtopic in topic.get_children %}
+			  {% if not subtopic.is_leaf_node %}
+              <li>
+                <a class="dropdown-item" href="#">{{ subtopic.name }} &raquo; </a>
+                <ul class="submenu dropdown-menu">
+					{% for subsubtopic in subtopic.get_children %}
+					<li><a class="dropdown-item" href="{{ subsubtopic.get_absolute_url }}">{{ subsubtopic.name }}</a></li>
+					{% endfor %}
+                </ul>
+              </li>
+			  {% else %}
+              <li>
+				  <a class="dropdown-item" href="{{ subtopic.get_absolute_url }}">
+					  {{ subtopic.name }}
+				  </a>
+			  </li>
+              {% endif %} 
+			  {% endfor %}
+            </ul>
+          </li>
+          {% else %}
+          <li>
+            <a class="dropdown-item" href="{{ topic.get_absolute_url }}">
+              {{ topic.name }}
+            </a>
+          </li>
+          {% endif %}
+		  {% endfor %}
+        </ul>
       </li>
       <li><a href="#" class="nav-link px-2">About</a></li>
     </ul>
     {% if user.is_authenticated %}
     <div class="col-md-3 text-end">
-        {% if user.is_paid_subscriber %}
-        <a href="{% url 'subscription:billing-portal' %}" class="btn btn-primary me-2">Upgrade</a>
-        {% else %}
-        <a href="{% url 'subscription:pricing' %}" class="btn btn-primary me-2">Upgrade</a>
-        {% endif %}
-        <a href="{% url 'accounts:logout' %}" class="btn btn-outline-primary me-2">Sign Out</a>
+      {% if user.is_paid_subscriber %}
+      <a
+        href="{% url 'subscription:billing-portal' %}"
+        class="btn btn-primary me-2"
+        >Upgrade</a
+      >
+      {% else %}
+      <a href="{% url 'subscription:pricing' %}" class="btn btn-primary me-2"
+        >Upgrade</a
+      >
+      {% endif %}
+      <a href="{% url 'accounts:logout' %}" class="btn btn-outline-primary me-2"
+        >Sign Out</a
+      >
     </div>
     {% else %}
     <div class="col-md-3 text-end">
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subscriptionModal">Subscribe</button>
-      <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary me-2">Login</a>
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#subscriptionModal"
+      >
+        Subscribe
+      </button>
+      <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary me-2"
+        >Login</a
+      >
     </div>
     {% endif %}
   </header>
 </div>
-
-
-{% comment %}
-    <nav class="navbar fixed-top bg-white" aria-label="Light offcanvas navbar">
-        <div class="container-fluid m-lg-2">
-          <a class="navbar-brand fw-bold text-primary" href="#">ArxivDigest</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbarLight" aria-controls="offcanvasNavbarLight" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="offcanvas offcanvas-end text-primary" tabindex="-1" id="offcanvasNavbarLight" aria-labelledby="offcanvasNavbarLightLabel">
-            <div class="offcanvas-header">
-              <h4 class="offcanvas-title" id="offcanvasNavbarLightLabel">Sections</h4>
-              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-              <form class="d-flex mb-3" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-primary" type="submit">Subscribe</button>
-              </form>
-                
-                <ul class="navbar-nav justify-content-end flex-grow-1 pe-3 list-unstyled ps-0">
-                  <li class="mb-1">
-                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
-                      Home
-                    </button>
-                    <div class="collapse show" id="home-collapse">
-                      <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Overview</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Updates</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Reports</a></li>
-                      </ul>
-                    </div>
-                  </li>
-                  <li class="mb-1">
-                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#topics-collapse" aria-expanded="false">
-                      Topics 
-                    </button>
-                    <div class="collapse" id="topics-collapse">
-                      <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        {% for topic in topics %}
-                        {% if topic.is_leaf_node %}
-                        <li><a href="{{ topic.get_absolute_url }}" class="link-body-primary d-inline-flex text-decoration-none rounded">{{ topic.name|title }}</a></li>
-                        {% else %}
-                        <li class="mb-1">
-                            <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ topic.abbrv }}-collapse" aria-expanded="false">
-                              {{ topic.name|title }} 
-                            </button>
-                            <div class="collapse" id="{{ topic.abbrv }}-collapse">
-                              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                                {% for subtopic in topic.get_children %}
-                                {% if subtopic.is_leaf_node %}
-                                <li><a href="{{ subtopic.get_absolute_url }}" class="link-body-primary d-inline-flex text-decoration-none rounded">{{ subtopic.name|title }}</a></li>
-                                {% else %}
-                                <li class="ps-3">
-                                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#{{ subtopic.abbrv }}-collapse" aria-expanded="false">
-                                      {{ subtopic.name|title }} 
-                                    </button>
-                                    <div class="collapse" id="{{ subtopic.abbrv }}-collapse">
-                                      <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                                          {% for sub_subtopic in subtopic %}
-                                          <li><a href="{{ sub_subtopic.get_absolute_url }}" class="link-body-primary d-inline-flex text-decoration-none rounded">{{ sub_subtopic.name|title }}</a></li>
-                                          {% endfor %}
-                                      </ul>
-                                    </div>
-                                </li>
-                                {% endif %}
-                                {% endfor %}
-                              </ul>
-                            </div>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
-                        <li class="ps-3">
-                            <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#subtopics-collapse" aria-expanded="false">
-                              Subtopics 
-                            </button>
-                            <div class="collapse" id="subtopics-collapse">
-                              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                                <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Subtopic 1</a></li>
-                                <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Subtopic 2</a></li>
-                              </ul>
-                            </div>
-                            
-                        </li>
-                      </ul>
-                    </div>
-                  </li>
-                  <li class="mb-1">
-                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
-                      Orders
-                    </button>
-                    <div class="collapse" id="orders-collapse">
-                      <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">New</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Processed</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Shipped</a></li>
-                        <li><a href="#" class="link-body-primary d-inline-flex text-decoration-none rounded">Returned</a></li>
-                      </ul>
-                    </div>
-                  </li>
-                  <li class="border-top my-3"></li>
-                  <li class="mb-1">
-                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed" data-bs-toggle="collapse" data-bs-target="#account-collapse" aria-expanded="false">
-                      Account
-                    </button>
-                    <div class="collapse" id="account-collapse">
-                      <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small text-primary">
-                        <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">New...</a></li>
-                        <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Profile</a></li>
-                        <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Settings</a></li>
-                        <li><a href="#" class="link-dark d-inline-flex text-decoration-none rounded">Sign out</a></li>
-                      </ul>
-                    </div>
-                  </li>
-                </ul>
-            </div>
-          </div>
-        </div>
-    </nav>
-{% endcomment %}

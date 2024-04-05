@@ -3,26 +3,22 @@
 {% load widget_tweaks %}
 
 {% block title %}
-Computer Science 
+{{ topic|title }}
 {% endblock %}
 
 {% block content %}
     
     <div class="container">
         <div id="cs" class="mt-4">
-            <div class="text-center">
-                <h2 class="text-primary">{{ topic.name|title }}</h2>
+            <div class="">
+                <h4 class="text-primary">{{ topic.name|title }}</h2>
             </div>
-             {% if topic.children.all %} 
-            <div class="d-grid gap-1 d-sm-flex justify-content-sm-center">
-                <select class="col form-select" aria-label="Default select example">
-                    <option selected>Select subject</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
-                <button type="button" class="btn btn-primary px-4">filter</button>
-            </div>
+            {% if topic.children.all %}
+            <div class="my-3 d-flex flex-wrap gap-2 gap-md-3 justify-content-center">
+                {% for subtopic in topic.get_children %}
+                  <a class="btn btn-outline-primary rounded py-1 px-2 text-xs" href="{{ subtopic.get_absolute_url }}">{{ subtopic.name|title }}</a>
+                {% endfor %}
+              </div>
             {% endif %}
             <hr class="my-3">
             

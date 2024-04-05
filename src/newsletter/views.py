@@ -37,7 +37,7 @@ class TopicDetailView(SingleObjectMixin, ListView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object(
             queryset=PaperTopic.objects.prefetch_related(
-                "subtopics", "papers__topics"
+                "children", "papers__topics"
             ).all()
         )
         return super().get(request, *args, **kwargs)

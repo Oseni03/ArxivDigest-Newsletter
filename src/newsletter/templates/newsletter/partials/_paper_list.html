@@ -1,4 +1,5 @@
 {% load static %}
+{% load django_htmx %}
 
 
 {% for paper in papers %}
@@ -10,24 +11,24 @@
 {% endif %}
     <div class="card shadow border-primary">
         <div class="card-body">
-        <h4 class="card-title">
-            <a
-            href=""
-            class="link-offset-2 link-underline link-underline-opacity-0"
-            >{{ paper.title }}</a
-            >
-        </h4>
-        {% comment %} <p class="text-muted">January 1, 2021 by</p> {% endcomment %}
-        <p class="card-text">
-            Lorem ipsum dolor sit amet, tetur et quod culpa eum voluptatum,
-            debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
-            iure voluptates! Voluptate dolorem recusandae maxime earum..
-        </p>
-        <div id="categories">
-            {% for cat in paper.topics.all %}
-            <a href="{{ cat.get_absolute_url }}"><span class="badge bg-primary">{{ cat.name }}</span></a>
-            {% endfor %}
-        </div>
+            <h5 class="card-title">
+                <a
+                href="{{ paper.get_absolute_url }}"
+                class="link-offset-2 link-underline link-underline-opacity-0"
+                >{{ paper.title }}</a
+                >
+            </h5>
+            {% comment %} <p class="text-muted">January 1, 2021 by</p> {% endcomment %}
+            <p class="card-text mt-3">
+                Lorem ipsum dolor sit amet, tetur et quod culpa eum voluptatum,
+                debitis odit, inventore. Aspernatur dolorem tempora quae, numquam
+                iure voluptates! Voluptate dolorem recusandae maxime earum..
+            </p>
+            <div id="categories">
+                {% for cat in paper.topics.all %}
+                <a href="{{ cat.get_absolute_url }}"><span class="badge bg-primary">{{ cat.name }}</span></a>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
