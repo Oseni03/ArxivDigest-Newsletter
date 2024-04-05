@@ -5,7 +5,7 @@
 {% for paper in papers %}
 
 {% if forloop.last %}
-<div class="col" hx-trigger="revealed" hx-get="{% url 'newsletter:home' %}?page={{ papers.number|add:1 }}" hx-swap="afterend" hx-target="this">
+<div class="col" hx-trigger="revealed" hx-get=".?page={{ papers.number|add:1 }}" hx-swap="afterend" hx-target="this">
 {% else %}
 <div class="col">
 {% endif %}
@@ -18,7 +18,7 @@
                 >{{ paper.title }}</a
                 >
             </h5>
-            {% comment %} <p class="text-muted">January 1, 2021 by</p> {% endcomment %}
+            <p class="text-muted">By <span class="fw-bold">{{ paper.authors|title }}</span></p>
             <p class="card-text mt-3">
                 Lorem ipsum dolor sit amet, tetur et quod culpa eum voluptatum,
                 debitis odit, inventore. Aspernatur dolorem tempora quae, numquam

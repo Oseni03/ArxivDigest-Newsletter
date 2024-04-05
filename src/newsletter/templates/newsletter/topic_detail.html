@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static %}
-{% load widget_tweaks %}
 
 {% block title %}
 {{ topic|title }}
@@ -13,7 +12,7 @@
             <div class="">
                 <h4 class="text-primary">{{ topic.name|title }}</h2>
             </div>
-            {% if topic.children.all %}
+            {% if not topic.is_leaf_node %}
             <div class="my-3 d-flex flex-wrap gap-2 gap-md-3 justify-content-center">
                 {% for subtopic in topic.get_children %}
                   <a class="btn btn-outline-primary rounded py-1 px-2 text-xs" href="{{ subtopic.get_absolute_url }}">{{ subtopic.name|title }}</a>
@@ -23,18 +22,7 @@
             <hr class="my-3">
             
             <div class="row row-cols-1 row-cols-md-2 g-3 mt-3">
-                {% for paper in page_obj %}
-                <div class="col">
-                    <div class="card shadow border-primary" >
-                      <div class="card-body">
-                        <h4 class="card-title">{{ paper.title }}</h4>
-                        <p class="text-muted">{{ paper.published_at }} by {{ paper.authors }}</p>
-                        <p class="card-text">{{ paper.summary }}</p>
-                        <a href="{{ paper.get_absolute_url }}" class="btn btn-primary btn-lg">View</a>
-                      </div>
-                    </div>
-                </div>
-                {% endfor %}
+                {% include "newsletter/partials/_paper_list.html" %}
             </div>
         </div>
     </div>

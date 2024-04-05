@@ -28,27 +28,27 @@ class HomeView(ListView):
         return super().get_template_names()
 
 
-class TopicDetailView(SingleObjectMixin, ListView):
-    paginate_by = 15
+class TopicDetailView(DetailView):
+    model = PaperTopic
     template_name = "newsletter/topic_detail.html"
     slug_url_kwarg = "abbrv"
     slug_field = "abbrv"
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(
-            queryset=PaperTopic.objects.prefetch_related(
-                "children", "papers__topics"
-            ).all()
-        )
-        return super().get(request, *args, **kwargs)
+    context_object_name = "topic"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["topic"] = self.object
+        papers = Paper.objects.filter(topics=self.object).visible()
+        paginator = Paginator(papers, 25)
+
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        context["papers"] = page_obj
         return context
 
-    def get_queryset(self):
-        return self.object.papers.visible()
+    def get_template_names(self, *args, **kwargs):
+        if self.request.htmx:
+            return "newsletter/partials/_paper_list.html"
+        return super().get_template_names()
 
 
 class PaperDetailView(View):
