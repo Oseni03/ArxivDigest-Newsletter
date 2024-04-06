@@ -76,28 +76,36 @@
         >
         <ul class="dropdown-menu">
           {% for topic in topics %} 
-		  {% if not topic.is_leaf_node %}
+          {% if not topic.is_leaf_node %}
           <li>
             <a class="dropdown-item" href="#"> {{ topic.name }} &raquo; </a>
             <ul class="submenu dropdown-menu">
-              {% for subtopic in topic.get_children %}
-			  {% if not subtopic.is_leaf_node %}
+              {% for subtopic in topic.get_children %} 
+              {% if not subtopic.is_leaf_node %}
               <li>
-                <a class="dropdown-item" href="#">{{ subtopic.name }} &raquo; </a>
+                <a class="dropdown-item" href="{{ subtopic.get_absolute_url }}"
+                  >{{ subtopic.name }} &raquo;
+                </a>
                 <ul class="submenu dropdown-menu">
-					{% for subsubtopic in subtopic.get_children %}
-					<li><a class="dropdown-item" href="{{ subsubtopic.get_absolute_url }}">{{ subsubtopic.name }}</a></li>
-					{% endfor %}
+                  {% for subsubtopic in subtopic.get_children %}
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="{{ subsubtopic.get_absolute_url }}"
+                      >{{ subsubtopic.name }}</a
+                    >
+                  </li>
+                  {% endfor %}
                 </ul>
               </li>
-			  {% else %}
+              {% else %}
               <li>
-				  <a class="dropdown-item" href="{{ subtopic.get_absolute_url }}">
-					  {{ subtopic.name }}
-				  </a>
-			  </li>
+                <a class="dropdown-item" href="{{ subtopic.get_absolute_url }}">
+                  {{ subtopic.name }}
+                </a>
+              </li>
               {% endif %} 
-			  {% endfor %}
+              {% endfor %}
             </ul>
           </li>
           {% else %}
@@ -106,8 +114,8 @@
               {{ topic.name }}
             </a>
           </li>
-          {% endif %}
-		  {% endfor %}
+          {% endif %} 
+          {% endfor %}
         </ul>
       </li>
       <li><a href="#" class="nav-link px-2">About</a></li>

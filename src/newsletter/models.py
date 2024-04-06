@@ -37,10 +37,17 @@ class Paper(models.Model):
     paper_number = models.CharField(max_length=15, unique=True)
     subjects = models.CharField(max_length=300, null=True)
     main_page = models.URLField(unique=True)
-    pdf_url = models.URLField(unique=True)
     is_visible = models.BooleanField(default=True)
     abstract = models.TextField()
     summary = models.TextField(null=True)
+
+    # Access paper
+    pdf_url = models.URLField(unique=True)
+    tex_source = models.URLField(unique=True, null=True)
+
+    # References and Citations 
+    google_scholar = models.URLField(unique=True, null=True)
+    semantic_scholar = models.URLField(unique=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -55,6 +62,15 @@ class Paper(models.Model):
     
     def get_absolute_url(self):
         return reverse("newsletter:paper_detail", args=(self.paper_number,))
+    
+    def save(self):
+        if not self.tex_source:
+            self.tex_source = self.main_page.replace("pdf", "src")
+        if not self.google_scholar:
+            self.google_scholar = f"https://scholar.google.com/scholar_lookup?arxiv_id={self.paper_number}"
+        if not self.semantic_scholar:
+            self.semantic_scholar = f"https://api.semanticscholar.org/arXiv:{self.paper_number}"
+        return super().save()
 
 
 class Newsletter(models.Model):

@@ -4,7 +4,7 @@
 
 {% for paper in papers %}
 
-{% if forloop.last %}
+{% if forloop.last and papers.has_next %}
 <div class="col" hx-trigger="revealed" hx-get=".?page={{ papers.number|add:1 }}" hx-swap="afterend" hx-target="this">
 {% else %}
 <div class="col">

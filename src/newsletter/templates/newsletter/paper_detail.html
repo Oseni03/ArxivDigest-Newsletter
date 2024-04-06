@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% load static %} {% block title %} {{ paper.title }}
+{% endblock %} {% block content %}
+<div class="container">
+  <h1 class="h3">{{ paper.title|title }}</h1>
+  <p class="text-muted fw-semibold">{{ paper.authors }}</p>
+  <hr class="my-3" />
+  <div class="row justify-content-center g-2">
+    <div class="col-md-9 border-primary p-3 mb-5 rounded rounded-0">
+      <h5>Abstract</h5>
+      <hr class="my-3" />
+      <p>{{ paper.abstract }}</p>
+    </div>
+    <div
+      class="col-md-3 border-primary p-3 mb-5 bg-body-tertiary rounded rounded-0"
+    >
+      <div class="mb-3">
+        <h5>Access</h5>
+        <hr class="my-2" />
+        <div class="d-grid gap-2">
+          <a href="{{ paper.main_page }}" name="arxiv-button" class="btn btn-outline-danger rounded-0">
+            Arxiv
+          </a>
+          <a href="{{ paper.pdf_url }}" name="pdf-button" class="btn btn-outline-primary rounded-0">
+            PDF 
+          </a>
+          <a href="{{ paper.tex_source }}" name="tex-button" class="btn btn-outline-primary rounded-0">
+            TEX source 
+          </a>
+        </div>
+      </div>
+      <div class="mb-3">
+        <h5>References and citations</h5>
+        <hr class="my-2" />
+        <div class="d-grid gap-2">
+          <a href="{{ paper.google_scholar }}" name="arxiv-button" class="btn btn-outline-primary rounded-0">
+            Google scholar
+          </a>
+          <a href="{{ paper.semantic_scholar }}" name="pdf-button" class="btn btn-outline-primary rounded-0">
+            Semantic scholar 
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

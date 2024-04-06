@@ -100,6 +100,7 @@ def _download_new_papers(field_abbr, path):
         paper_number = dt_list[i].text.strip().split(" ")[2].split(":")[-1]
         paper["main_page"] = arxiv_base + paper_number
         paper["pdf"] = arxiv_base.replace("abs", "pdf") + paper_number
+        paper["tex_source"] = arxiv_base.replace("abs", "src") + paper_number
 
         paper["title"] = (
             dd_list[i]
@@ -124,6 +125,8 @@ def _download_new_papers(field_abbr, path):
             dd_list[i].find("p", {"class": "mathjax"}).text.replace("\n", " ").strip()
         )
         paper["paper_number"] = paper_number
+        paper["google_scholar"] = f"https://scholar.google.com/scholar_lookup?arxiv_id={paper_number}"
+        paper["semantic_scholar"] = f"https://api.semanticscholar.org/arXiv:{paper_number}"
         new_paper_list.append(paper)
     
     #  check if ./data exist, if not, create it
@@ -150,8 +153,11 @@ def load_papers(result, topic_id):
                 title=paper_data["title"],
                 main_page=paper_data["main_page"],
                 pdf_url=paper_data["pdf"],
+                tex_source=paper_data["tex_source"],
                 abstract=paper_data["abstract"],
                 paper_number=paper_data["paper_number"],
+                semantic_scholar=paper_data["semantic_scholar"],
+                google_scholar=paper_data["google_scholar"],
             )
             # Assign the topic to the Paper object
             paper.topics.add(topic_id)

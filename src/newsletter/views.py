@@ -51,12 +51,12 @@ class TopicDetailView(DetailView):
         return super().get_template_names()
 
 
-class PaperDetailView(View):
+class PaperDetailView(DetailView):
+    model = Paper
     template_name = "newsletter/paper_detail.html"
-
-    def get(self, request, paper_number, *args, **kwargs):
-        paper = get_object_or_404(Paper, paper_number=paper_number)
-        return render(request, self.template_name, {"paper": paper})
+    slug_url_kwarg = "paper_number"
+    slug_field = "paper_number"
+    context_object_name = "paper"
 
 
 class NewsletterListView(ListView):
