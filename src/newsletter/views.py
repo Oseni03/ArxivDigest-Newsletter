@@ -16,16 +16,20 @@ from .utils.email_validator import email_is_valid
 from accounts.models import User
 
 
-class HomeView(ListView):
-    model = Paper
-    paginate_by = 25    
+class HomeView(View):
     template_name = "newsletter/home.html"
-    context_object_name = "papers"
     
-    def get_template_names(self, *args, **kwargs):
-        if self.request.htmx:
-            return "newsletter/partials/_paper_list.html"
-        return super().get_template_names()
+    def get(self, request, *args, **kwargs):
+        context = {}
+        papers = Paper.objects.visible()
+        paginator = Paginator(papers, 25)
+
+        page_number = request.GET.get("page", None)
+        page_obj = paginator.get_page(page_number)
+        context["papers"] = page_obj
+        if request.htmx:
+            return render(request, "newsletter/partials/_paper_list.html", context)
+        return render(request, self.template_name, context)
 
 
 class TopicDetailView(DetailView):
