@@ -74,10 +74,9 @@ def topic_subscription(request, topic_abbrv):
     user = request.user
     if topic in user.subscribed_topics.all():
         user.subscribed_topics.remove(topic)
-        user.save()
     else:
         user.subscribed_topics.add(topic)
-        user.save()
+    user.save()
 
     context = {
         "topics": PaperTopic.objects.prefetch_related("children").parents(),
