@@ -1,0 +1,20 @@
+{% load static %} {% load django_htmx %}
+
+<h4 class="text-primary">{{ topic.name|title }}</h4>
+<label class="btn btn-primary active">
+  <form>
+    {% csrf_token %} Subscribe
+    <input
+      type="checkbox"
+      class="ms-2"
+      {% if user.is_authenticated and topic in user.subscribed_topics.all %} 
+      checked 
+      {% endif %}
+      autocomplete="off"
+      name="topic-abbrv"
+      hx-post="{% url 'newsletter:topic-subscription' topic.abbrv %}"
+      hx-target="#topic-header"
+      hx-trigger="click"
+    />
+  </form>
+</label>

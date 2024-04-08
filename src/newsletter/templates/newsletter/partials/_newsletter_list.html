@@ -1,7 +1,7 @@
 {% load static %}
 {% load django_htmx %}
 
-<form action="{% url 'newsletter:newsletters' %}" method="POST">
+<form >
 	{% csrf_token %}
 	<div class="my-4">
 		{% for topic in topics %} 
@@ -15,7 +15,6 @@
 				{% if not subtopic.is_not_leaf_node %}
 				<div class="d-flex justify-content-between">
 					<div class="form-check">
-						{% if user.is_authenticated and subtopic in user.subscribed_topics.all %}
 						<input
 							class="form-check-input"
 							name="categories"
@@ -25,20 +24,8 @@
 							hx-trigger="click"
 							hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
 							hx-target="#newsletter-list"
-							checked
+							{% if user.is_authenticated and subtopic in user.subscribed_topics.all %} checked {% endif %}
 						/>
-						{% else %}
-						<input
-							class="form-check-input"
-							name="categories"
-							type="checkbox"
-							value="{{ subtopic.abbrv }}"
-							id="defaultCheck1"
-							hx-trigger="click"
-							hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
-							hx-target="#newsletter-list"
-						/>
-						{% endif %}
 						<label class="form-check-label" for="defaultCheck1">
 							{{ subtopic.name|title }}
 						</label>
@@ -47,7 +34,6 @@
 				<div id="{{ subsubtopic.abbrv }}" class="ms-4">
 					{% for subsubtopic in subtopic.get_children %}
 					<div class="form-check">
-						{% if user.is_authenticated and subsubtopic in user.subscribed_topics.all %}
 						<input
 							class="form-check-input"
 							name="categories"
@@ -57,20 +43,8 @@
 							hx-trigger="click"
 							hx-post="{% url 'newsletter:topic-subscription' subsubtopic.abbrv %}"
 							hx-target="#newsletter-list"
-							checked
+							{% if user.is_authenticated and subsubtopic in user.subscribed_topics.all %} checked {% endif %}
 						/>
-						{% else %}
-						<input
-							class="form-check-input"
-							name="categories"
-							type="checkbox"
-							value="{{ subsubtopic.abbrv }}"
-							id="defaultCheck1"
-							hx-trigger="click"
-							hx-post="{% url 'newsletter:topic-subscription' subsubtopic.abbrv %}"
-							hx-target="#newsletter-list"
-						/>
-						{% endif %}
 						<label class="form-check-label" for="{{ subsubtopic.abbrv }}">
 							{{ subsubtopic.name|title }}
 						</label>
@@ -79,7 +53,6 @@
 				</div>
 				{% else %}
 				<div class="form-check">
-					{% if user.is_authenticated and subtopic in user.subscribed_topics.all %}
 					<input
 						class="form-check-input"
 						name="categories"
@@ -89,20 +62,8 @@
 						hx-trigger="click"
 						hx-target="#newsletter-list"
 						hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
-						checked
+						{% if user.is_authenticated and subtopic in user.subscribed_topics.all %} checked {% endif %}
 					/>
-					{% else %}
-					<input
-						class="form-check-input"
-						name="categories"
-						type="checkbox"
-						value="{{ subtopic.abbrv }}"
-						id="{{ subtopic.abbrv }}"
-						hx-trigger="click"
-              			hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
-              			hx-target="#newsletter-list"
-					/>
-					{% endif %}
 					<label class="form-check-label" for="{{ subtopic.abbrv }}">
 						{{ subtopic.name|title }}
 					</label>
@@ -113,7 +74,6 @@
 		</div>
 		{% else %}
 		<div class="form-check">
-			{% if user.is_authenticated and subtopic in user.subscribed_topics.all %}
 			<input
 				class="form-check-input"
 				name="categories"
@@ -123,20 +83,8 @@
 				hx-trigger="click"
               	hx-post="{% url 'newsletter:topic-subscription' topic.abbrv %}"
               	hx-target="#newsletter-list"
-				checked
+				{% if user.is_authenticated and topic in user.subscribed_topics.all %} checked {% endif %}
 			/>
-			{% else %}
-			<input
-				class="form-check-input"
-				name="categories"
-				type="checkbox"
-				value="{{ topic.abbrv }}"
-				id="defaultCheck2"
-				hx-trigger="click"
-              	hx-post="{% url 'newsletter:topic-subscription' topic.abbrv %}"
-              	hx-target="#newsletter-list"
-			/>
-			{% endif %}
 			<label class="form-check-label" for="defaultCheck2">
 				{{ topic.name|title }}
 			</label>

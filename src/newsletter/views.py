@@ -69,7 +69,7 @@ class NewsletterListView(ListView):
 
 
 @login_required
-def topic_subscription(request, topic_abbrv):
+def topic_subscription(request, topic_abbrv: str):
     topic = get_object_or_404(PaperTopic, abbrv=topic_abbrv)
     user = request.user
     if topic in user.subscribed_topics.all():
@@ -78,10 +78,14 @@ def topic_subscription(request, topic_abbrv):
         user.subscribed_topics.add(topic)
     user.save()
 
-    context = {
-        "topics": PaperTopic.objects.prefetch_related("children").parents(),
-    }
-    return render(request, "newsletter/partials/_newsletter_list.html", context)
+    current_url = request.htmx.current_url
+    if "newsletters" in current_url:
+        context = {
+            "topics": PaperTopic.objects.prefetch_related("children").parents(),
+        }
+        return render(request, "newsletter/partials/_newsletter_list.html", context)
+    else:
+        return render(request, "newsletter/partials/_topic_header.html", {"topic": topic})
 
 
 class NewsletterSubscribeView(View):
