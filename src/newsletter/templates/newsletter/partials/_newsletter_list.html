@@ -27,7 +27,7 @@
 							{% if user.is_authenticated and subtopic in user.subscribed_topics.all %} checked {% endif %}
 						/>
 						<label class="form-check-label" for="defaultCheck1">
-							{{ subtopic.name|title }}
+							<a href="{{ subtopic.get_absolute_url }}">{{ subtopic.name|title }}</a>
 						</label>
 					</div>
 				</div>
@@ -46,7 +46,7 @@
 							{% if user.is_authenticated and subsubtopic in user.subscribed_topics.all %} checked {% endif %}
 						/>
 						<label class="form-check-label" for="{{ subsubtopic.abbrv }}">
-							{{ subsubtopic.name|title }}
+							<a href="{{ subsubtopic.get_absolute_url }}">{{ subsubtopic.name|title }}</a>
 						</label>
 					</div>
 					{% endfor %}
@@ -65,7 +65,7 @@
 						{% if user.is_authenticated and subtopic in user.subscribed_topics.all %} checked {% endif %}
 					/>
 					<label class="form-check-label" for="{{ subtopic.abbrv }}">
-						{{ subtopic.name|title }}
+						<a href="{{ subtopic.get_absolute_url }}">{{ subtopic.name|title }}</a>
 					</label>
 				</div>
 				{% endif %} 
@@ -86,7 +86,7 @@
 				{% if user.is_authenticated and topic in user.subscribed_topics.all %} checked {% endif %}
 			/>
 			<label class="form-check-label" for="defaultCheck2">
-				{{ topic.name|title }}
+				<a href="{{ topic.get_absolute_url }}">{{ topic.name|title }}</a>
 			</label>
 		</div>
 		{% endif %} 
