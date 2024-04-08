@@ -62,23 +62,10 @@ class PaperDetailView(DetailView):
     context_object_name = "paper"
 
 
-class NewsletterListView(LoginRequiredMixin, ListView):
+class NewsletterListView(ListView):
     model = Newsletter
     template_name = "newsletter/newsletters.html"
     context_object_name = "newsletters"
-
-    def post(self, request, **kwargs):
-        data = dict(request.POST)
-        categories = data.get("categories", [])
-        if categories:
-            topics = [
-                get_object_or_404(PaperTopic, abbrv=category)
-                for category in categories
-            ]
-            for topic in topics:
-                request.user.subscribed_topics.add(topic)
-            request.user.save()
-        return render(request, self.template_name, {})
 
 
 @login_required
