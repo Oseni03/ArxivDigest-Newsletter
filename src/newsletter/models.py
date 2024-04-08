@@ -12,7 +12,7 @@ from .querysets import PaperQuerySet, PaperTopicQuerySet
 
 class PaperTopic(MPTTModel):
     name = models.CharField(max_length=255)
-    abbrv = models.CharField(max_length=50, null=True)
+    abbrv = models.CharField(max_length=50, unique=True, null=True)
     parent = TreeForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

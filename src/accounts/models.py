@@ -5,6 +5,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
 
@@ -164,3 +165,6 @@ class Subscription(models.Model):
     topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        models.UniqueConstraint(fields=['user', 'topic'], name='unique_user_subscription')

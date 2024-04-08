@@ -1,11 +1,10 @@
 from django.urls import reverse
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Prefetch
-from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.forms import UserCreationForm
-from django.views.generic.detail import SingleObjectMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, FormView, ListView, TemplateView, View
 
@@ -63,9 +62,40 @@ class PaperDetailView(DetailView):
     context_object_name = "paper"
 
 
-class NewsletterListView(ListView):
+class NewsletterListView(LoginRequiredMixin, ListView):
     model = Newsletter
     template_name = "newsletter/newsletters.html"
+    context_object_name = "newsletters"
+
+    def post(self, request, **kwargs):
+        data = dict(request.POST)
+        categories = data.get("categories", [])
+        if categories:
+            topics = [
+                get_object_or_404(PaperTopic, abbrv=category)
+                for category in categories
+            ]
+            for topic in topics:
+                request.user.subscribed_topics.add(topic)
+            request.user.save()
+        return render(request, self.template_name, {})
+
+
+@login_required
+def topic_subscription(request, topic_abbrv):
+    topic = get_object_or_404(PaperTopic, abbrv=topic_abbrv)
+    user = request.user
+    if topic in user.subscribed_topics.all():
+        user.subscribed_topics.remove(topic)
+        user.save()
+    else:
+        user.subscribed_topics.add(topic)
+        user.save()
+
+    context = {
+        "topics": PaperTopic.objects.prefetch_related("children").parents(),
+    }
+    return render(request, "newsletter/partials/_newsletter_list.html", context)
 
 
 class NewsletterSubscribeView(View):
