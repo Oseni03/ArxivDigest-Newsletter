@@ -36,6 +36,7 @@ class CustomUserManager(BaseUserManager):
             password=password,
         )
         user.is_admin = True
+        user.is_paid_subscriber = True
         user.save(using=self._db)
         return user
 

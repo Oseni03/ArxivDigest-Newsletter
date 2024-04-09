@@ -1,0 +1,43 @@
+{% load static %}
+{% load widget_tweaks %} 
+{% load django_htmx %} 
+
+<!-- Modal Body -->
+<!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
+<div
+	class="modal fade"
+	id="createAlertId"
+	tabindex="-1"
+	aria-labelledby="modalTitleId"
+	aria-hidden="true"
+>
+	<form >
+		{% csrf_token %}
+		<div
+			class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
+			role="document"
+		>
+			<div class="modal-content">
+				<div class="modal-body">
+					<h5 class="text-center my-3" id="modalTitleId">Create a custom alert</h5>
+					<div class="mb-3">
+						{% render_field alert_form.name class="form-control" placeholder="Title" %}
+						<small id="helpId" class="form-text text-muted">Interested research title</small>
+					</div>
+					
+				</div>
+				<div class="modal-footer">
+					<button
+						type="button"
+						class="btn btn-secondary"
+						data-bs-dismiss="modal"
+					>
+						Close
+					</button>
+					<button hx-trigger="click" hx-post="{% url "alert:create-alert" %}" hx-target="#newsletter-header" class="btn btn-primary">Create</button>
+				</div>
+			</div>
+		</div>
+
+	</form>
+</div>

@@ -1,3 +1,4 @@
+from typing import Any
 from django.urls import reverse
 from django.conf import settings
 from django.contrib import messages
@@ -13,6 +14,8 @@ from .models import PaperTopic, Paper, Newsletter
 from .utils.email_validator import email_is_valid
 
 from accounts.models import User
+from alert.forms import AlertForm
+from alert.models import Alert
 
 
 class HomeView(View):
@@ -66,6 +69,13 @@ class NewsletterListView(ListView):
     model = Newsletter
     template_name = "newsletter/newsletters.html"
     context_object_name = "newsletters"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["alert_form"] = AlertForm
+        if self.request.user.is_authenticated:
+            context["alerts"] = Alert.objects.filter(user=self.request.user)
+        return context
 
 
 @login_required

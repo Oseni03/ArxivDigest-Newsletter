@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "newsletter",
     "accounts",
     "subscription",
+    "alert",
     
     # django-allauth
     'allauth',

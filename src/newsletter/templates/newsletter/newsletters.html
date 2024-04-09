@@ -1,33 +1,29 @@
-{% extends "base.html" %}
-{% load static %}
-{% load widget_tweaks %}
+{% extends "base.html" %} 
+{% load static %} 
+{% load widget_tweaks %} 
 
-{% block title %}
-Newsletters and Alerts
-{% endblock %}
+{% block title %} Newsletters and Alerts {% endblock %} 
 
 {% block content %}
-    <div class="container">
-        <div class="text-center mt-4">
-            <h2 class="text-primary">Newsletters & Alerts</h2>
-            <h5 class="text-muted">Get the best of Arxiv in your inbox</h5>
-        </div>
-        
-        {% if user.is_authenticated %}
-        <div class="my-5">
-          <div class="position-relative p-3 px-md-5 text-center text-muted bg-body border border-dashed rounded-5">
-            <h1 class="text-body-emphasis mt-5">Custom Alert</h1>
-            <p class="col-lg-6 mx-auto mb-4">
-              This faded back jumbotron is useful for placeholder content. It's also a great way to add a bit of context to a page or section when no content is available and to encourage visitors to take a specific action.
-            </p>
-            <button class="btn btn-primary px-5 mb-5 btn-lg" type="button">
-              New alert
-            </button>
-          </div>
-        </div>
-        {% endif %}
-        <div id="newsletter-list">
-          {% include 'newsletter/partials/_newsletter_list.html' %}
-        </div>
-    </div>
+<div class="container">
+	<div class="text-center mt-4">
+		<h2 class="text-primary">Newsletters & Alerts</h2>
+		<h5 class="text-muted">Get the best of Arxiv in your inbox</h5>
+	</div>
+
+	{% if user.is_authenticated %}
+	<div class="my-5" id="newsletter-header">
+		{% if alerts %}
+			{% include "alert/partials/_alert_list.html" %}
+		{% else %}
+			{% include "newsletter/partials/_newsletter_header.html" %}
+		{% endif %}
+	</div>
+	{% endif %}
+	<div id="newsletter-list">
+		<h3 class="text-primary">Newsletters</h3>
+		{% include 'newsletter/partials/_newsletter_list.html' %}
+	</div>
+</div>
+{% include "alert/partials/_create_alert_modal.html" %}
 {% endblock %}

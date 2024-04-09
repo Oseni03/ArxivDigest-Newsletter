@@ -1,0 +1,31 @@
+{% load static %}
+
+
+<div class="row g-3">
+    <div class="d-flex justify-content-between align-items-center ">
+        <h3 class="text-primary">Alerts</h3>
+        <button
+            type="button"
+            class="btn btn-primary px-5 mb-3 btn-lg"
+            data-bs-toggle="modal"
+            data-bs-target="#createAlertId"
+        >
+            New alert
+        </button>
+    </div>
+    {% for alert in alerts %}
+    <div class="col col-md-4">
+        <form hx-confirm="Are you sure?">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">{{ alert.name|title }}</h4>
+                        <button type="button" class="btn-close" aria-label="Close" hx-delete="{% url "alert:delete-alert" alert.id %}" hx-target="#newsletter-header"></button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+</div>

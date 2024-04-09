@@ -6,5 +6,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace="accounts")),
     path('accounts/', include('allauth.urls')),
     path('subscription/', include('subscription.urls', namespace="subscription")),
+    path('alert/', include('alert.urls', namespace="alert")),
     path('', include('newsletter.urls', namespace="newsletter")),
 ]
