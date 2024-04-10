@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 from django.conf import settings
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
@@ -23,7 +24,7 @@ class PaperTopic(MPTTModel):
     
     class MPTTMeta:
         order_insertion_by = ['name']
-        verbose_name_plural = 'Paper topics'
+        verbose_name_plural = _('Paper topics')
     
     def __str__(self):
         return str(self.name)
@@ -87,7 +88,7 @@ class Newsletter(models.Model):
     def __str__(self):
         return str(self.topic)
     
-    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
+    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None: # type: ignore
         if not self.slug:
             self.slug = slugify(self.title)
         return super().save(force_insert, force_update, using, update_fields)

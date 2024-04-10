@@ -118,18 +118,14 @@ class NewsletterSubscribeView(View):
             if user.exists():
                 return redirect("accounts:login")
             else:
-                return render(
-                    request,
-                    "accounts/register.html",
-                    {"form": UserCreationForm(initial={"username": email_address})},
-                )
+                return redirect("accounts:register")
         else:
             context = {
                 "source": "subscribe",
                 "form": form,
             }
             for error in form.errors.values():
-                messages.error(self.request, error)
+                messages.error(request, error)
             return render(request, self.template_name, context)
 
 

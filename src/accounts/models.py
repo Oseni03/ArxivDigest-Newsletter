@@ -8,6 +8,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 from .utils import send_subscription_verification_email
 
@@ -162,8 +163,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Subscription(models.Model):
+    class Schedule(models.TextChoices):
+        DAILY = "DAILY", _("Daily")
+        WEEKLY = "WEEKLY", _("Weekly")
+        BI_WEEKLY = "BI_WEEKLY", _("Bi Weekly")
+        TRI_WEEKLY = "TRI_WEEKLY", _("Tri Weekly")
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
+    schedule = models.DateTimeField(choices=Schedule.choices, default=Schedule.WEEKLY)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
