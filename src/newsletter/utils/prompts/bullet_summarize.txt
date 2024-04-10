@@ -1,0 +1,5 @@
+Given the list of research paper summaries below, please provide a concise summary highlighting the most insightful point and key finding in one sentence for each of the summaries.
+
+{texts}
+
+{format_instructions}
