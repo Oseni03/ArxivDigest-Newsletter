@@ -1,7 +1,9 @@
 # import hashid_field
+from typing import Iterable
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
+from django.utils.text import slugify
 
 from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
@@ -84,4 +86,9 @@ class Newsletter(models.Model):
     
     def __str__(self):
         return str(self.topic)
+    
+    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(force_insert, force_update, using, update_fields)
     
