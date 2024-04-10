@@ -3,8 +3,8 @@ import os
 import tqdm
 import json
 import pytz
+import random
 import datetime
-import requests
 import threading
 import urllib.request
 from bs4 import BeautifulSoup 
@@ -12,10 +12,31 @@ from urllib.parse import urljoin
 from django.db import transaction
 
 from newsletter.models import PaperTopic, Paper
+from newsletter.tasks import embed_papers
+
+
+user_agents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (X11; Linux i686; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.44',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.44'
+]
 
 
 def get_subsubfields(url="https://arxiv.org/archive/astro-ph"):
-    response = requests.get(url)
+    response = urllib.request.urlopen(url, headers={'User-Agent': random.choice(user_agents)})
     soup = BeautifulSoup(response.text, "html.parser")
     
     subsubfields_list = []
@@ -35,7 +56,7 @@ def get_subsubfields(url="https://arxiv.org/archive/astro-ph"):
 
 
 def get_fields(url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_topics.json"):
-    response = requests.get(url)
+    response = urllib.request.urlopen(url, headers={'User-Agent': random.choice(user_agents)})
     soup = BeautifulSoup(response.text, "html.parser")
     
     fields = soup.select("main div#content h2")[:-1]
@@ -81,7 +102,7 @@ def _download_new_papers(field_abbr, path):
     NEW_SUB_URL = (
         f"https://arxiv.org/list/{field_abbr}/new"  # https://arxiv.org/list/cs/new
     )
-    page = urllib.request.urlopen(NEW_SUB_URL)
+    page = urllib.request.urlopen(NEW_SUB_URL, headers={'User-Agent': random.choice(user_agents)})
     soup = BeautifulSoup(page, "html.parser")
     content = soup.body.find("div", {"id": "content"})
 
@@ -145,10 +166,11 @@ def _download_new_papers(field_abbr, path):
 
 
 def load_papers(result, topic_id):
+    new_papers = []
     with transaction.atomic():
         for paper_data in result:
             # Create or get the Paper object within an atomic transaction
-            paper, _ = Paper.objects.get_or_create(
+            paper, created = Paper.objects.get_or_create(
                 authors=paper_data["authors"],
                 title=paper_data["title"],
                 main_page=paper_data["main_page"],
@@ -162,7 +184,12 @@ def load_papers(result, topic_id):
             # Assign the topic to the Paper object
             paper.topics.add(topic_id)
             paper.save()
-        
+
+            if created:
+                new_papers.append(paper)
+    
+    print(f"Saved {len(new_papers)} new papers with topic id: {topic_id}")
+    embed_papers.s(new_papers)
     return result
 
 
@@ -189,7 +216,8 @@ def get_papers(limit=None, path="newsletter/utils/data/papers"):
                     #     if limit and i == limit:
                     #         return result
                     #     result.append(json.loads(line))
-            
+            results + result
+
             thread = threading.Thread(target=load_papers, args=(result, topic.id))
             threads.append(thread)
             thread.start()
