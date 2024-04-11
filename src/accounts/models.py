@@ -171,7 +171,7 @@ class Subscription(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
-    schedule = models.DateTimeField(choices=Schedule.choices, default=Schedule.WEEKLY)
+    schedule = models.CharField(max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

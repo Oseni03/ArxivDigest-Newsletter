@@ -6,4 +6,4 @@ from .models import Alert
 class AlertForm(forms.ModelForm):
     class Meta:
         model = Alert
-        fields = ("name",)
+        fields = ("name", "schedule")

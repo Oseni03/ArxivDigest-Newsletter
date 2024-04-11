@@ -23,6 +23,7 @@
                         <h4 class="card-title">{{ alert.name|title }}</h4>
                         <button type="button" class="btn-close" aria-label="Close" hx-delete="{% url "alert:delete-alert" alert.id %}" hx-target="#newsletter-header"></button>
                     </div>
+                    <p class="text-muted">{{ alert.schedule }}</p>
                 </div>
             </div>
         </form>
