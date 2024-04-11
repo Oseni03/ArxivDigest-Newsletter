@@ -6,10 +6,9 @@ from django.conf import settings
 from django.core.mail import EmailMessage, get_connection
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils import timezone
 from django.contrib.auth import get_user_model
 
-from accounts.models import Subscription
+from accounts.models import Schedule, Subscription
 from newsletter.models import Newsletter, Paper, PaperTopic
 
 User = get_user_model()
@@ -194,7 +193,7 @@ class NewsletterEmailSender:
         )
 
 
-def send_email_newsletter(topics=None, schedule: Subscription.Schedule = Subscription.Schedule.DAILY):
+def send_email_newsletter(topics: List[PaperTopic]=None, schedule: Schedule = Schedule.DAILY):
     logger.info(f"About to send out newsletter for {schedule} schedule")
     send_newsletter = NewsletterEmailSender(
         topics=topics,

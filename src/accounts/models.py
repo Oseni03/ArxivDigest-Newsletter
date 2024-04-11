@@ -162,13 +162,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         return topic in self.subscribed_topics.all()
 
 
-class Subscription(models.Model):
-    class Schedule(models.TextChoices):
-        DAILY = "DAILY", _("Daily")
-        WEEKLY = "WEEKLY", _("Weekly")
-        BI_WEEKLY = "BI_WEEKLY", _("Bi Weekly")
-        TRI_WEEKLY = "TRI_WEEKLY", _("Tri Weekly")
+class Schedule(models.TextChoices):
+    DAILY = "DAILY", _("Daily")
+    WEEKLY = "WEEKLY", _("Weekly")
+    BI_WEEKLY = "BI_WEEKLY", _("Bi Weekly")
+    TRI_WEEKLY = "TRI_WEEKLY", _("Tri Weekly")
 
+
+class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscriptions")
     topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
     schedule = models.CharField(max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY)
