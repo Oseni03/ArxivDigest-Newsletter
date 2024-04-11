@@ -7,15 +7,21 @@ from mptt.admin import MPTTModelAdmin
 
 class NewsletterAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ["subject"]}
-    date_hierarchy = 'created_at'
+    date_hierarchy = "created_at"
     list_display = (
-        'subject', 'topic', 'schedule', 'sent_at',
+        "subject",
+        "topic",
+        "schedule",
+        "sent_at",
     )
-    search_fields = ('topic', 'subject')
-    readonly_fields = ('created_at', 'sent_at',)
-    sortable_by = ('schedule', 'sent_at', 'created_at')
+    search_fields = ("topic", "subject")
+    readonly_fields = (
+        "created_at",
+        "sent_at",
+    )
+    sortable_by = ("schedule", "sent_at", "created_at")
 
-    actions = ('send_newsletters',)
+    actions = ("send_newsletters",)
 
     def send_newsletters(self, request, queryset):
         # This should always be overridden to use a task
@@ -23,47 +29,56 @@ class NewsletterAdmin(admin.ModelAdmin):
         messages.add_message(
             request,
             messages.SUCCESS,
-            'Sending selected newsletters(s) to the subscribers',
+            "Sending selected newsletters(s) to the subscribers",
         )
 
-    send_newsletters.short_description = 'Send newsletters'
+    send_newsletters.short_description = "Send newsletters"
 
 
 class PaperAdmin(admin.ModelAdmin):
-    list_select_related = ('topic',)
+    list_select_related = ("topic",)
     list_display = (
-        'title', 'topic',
-        'source_url', 'is_visible',
+        "title",
+        "topic",
+        "source_url",
+        "is_visible",
     )
-    list_filter = ('is_visible', 'topic', 'published_at')
+    list_filter = ("is_visible", "topic", "published_at")
     search_fields = (
-        'title', 'abstract',
-        'topic__title',
+        "title",
+        "abstract",
+        "topic__title",
     )
-    readonly_fields = ('created_at', 'updated_at',)
-    autocomplete_fields = ('topic',)
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+    autocomplete_fields = ("topic",)
 
-    actions = ('hide_post', 'make_post_visible',)
+    actions = (
+        "hide_post",
+        "make_post_visible",
+    )
 
     def hide_post(self, request, queryset):
         updated = queryset.update(is_visible=False)
         messages.add_message(
             request,
             messages.SUCCESS,
-            f'Successfully marked {updated} post(s) as hidden',
+            f"Successfully marked {updated} post(s) as hidden",
         )
 
-    hide_post.short_description = 'Hide posts from users'
+    hide_post.short_description = "Hide posts from users"
 
     def make_post_visible(self, request, queryset):
         updated = queryset.update(is_visible=True)
         messages.add_message(
             request,
             messages.SUCCESS,
-            f'Successfully made {updated} post(s) visible',
+            f"Successfully made {updated} post(s) visible",
         )
 
-    make_post_visible.short_description = 'Make posts visible'
+    make_post_visible.short_description = "Make posts visible"
 
 
 class CustomMPTTModelAdmin(MPTTModelAdmin):

@@ -5,13 +5,13 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = 'Loads the arxiv.org fields/topics into the database'
-    
+    help = "Loads the arxiv.org fields/topics into the database"
+
     def handle(self, *args, **options):
         if not os.path.exists("newsletter/utils/data/arxiv_topics.json"):
             get_fields()
         with open("newsletter/utils/data/arxiv_topics.json") as file:
             data = json.load(file)
-        
+
         load_fields(data)
-        self.stdout.write(self.style.SUCCESS('Load arxiv topics successfully'))
+        self.stdout.write(self.style.SUCCESS("Load arxiv topics successfully"))

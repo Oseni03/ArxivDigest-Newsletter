@@ -8,7 +8,7 @@ class PaperTools:
     @tool("Query the database")
     def query_database(topic_abbrv: str, limit: int = 10):
         """
-        Useful to query the database about a given topic/field abbreviation 
+        Useful to query the database about a given topic/field abbreviation
         and return relevant results
 
         Args:
@@ -18,7 +18,9 @@ class PaperTools:
         Returns:
             list: The list containing a dict of paper information.
         """
-        papers = Paper.objects.filter(topics__abbrv=topic_abbrv, is_visible=True)[:limit]
+        papers = Paper.objects.filter(topics__abbrv=topic_abbrv, is_visible=True)[
+            :limit
+        ]
         papers = [
             {
                 "title": paper.title,
@@ -42,5 +44,3 @@ class PaperTools:
         #     ]))
         # return "\n".join(string)
         return papers
-
-    

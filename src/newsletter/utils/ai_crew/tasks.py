@@ -1,4 +1,4 @@
-from crewai import Task 
+from crewai import Task
 from datetime import datetime
 
 
@@ -18,9 +18,9 @@ class AINewsletterTasks:
                         "summary": "AI made a splash in this year\'s Super Bowl commercials..."
                     },
                     {{...}}
-                ]"""
+                ]""",
         )
-    
+
     def analyze_papers_task(self, agent, context):
         return Task(
             description="Analyze each research paper and ensure there are at least 5 well-formatted points",
@@ -36,9 +36,9 @@ class AINewsletterTasks:
                 **The details:**\n\n
                 - Microsoft\'s Copilot spot showcased its AI assistant...\n\n
                 **Why it matters:** While AI-related ads have been rampant over the last year, its SUper Bowl presents...
-            """
+            """,
         )
-    
+
     def compile_newsletter_task(self, agent, context, callback_function):
         return Task(
             description="Compile the newsletter",
@@ -59,5 +59,5 @@ class AINewsletterTasks:
                 **The details:**...\\n\\n
                 **Why it matters:**...\\n\\n
             """,
-            callback=callback_function
+            callback=callback_function,
         )

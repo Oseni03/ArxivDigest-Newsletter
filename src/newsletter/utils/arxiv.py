@@ -7,7 +7,7 @@ import random
 import datetime
 import threading
 import urllib.request
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from django.db import transaction
 
@@ -16,51 +16,61 @@ from newsletter.tasks import embed_papers
 
 
 user_agents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (X11; Linux i686; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.44',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.44'
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (X11; Linux i686; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.44",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.44",
 ]
 
 
 def get_subsubfields(url="https://arxiv.org/archive/astro-ph"):
-    response = urllib.request.urlopen(url, headers={'User-Agent': random.choice(user_agents)})
+    response = urllib.request.urlopen(
+        url, headers={"User-Agent": random.choice(user_agents)}
+    )
     soup = BeautifulSoup(response.text, "html.parser")
-    
+
     subsubfields_list = []
     try:
-        fields = soup.select_one("main div#content h2").next_sibling.next_sibling.select("li")
+        fields = soup.select_one(
+            "main div#content h2"
+        ).next_sibling.next_sibling.select("li")
         for field in fields:
             obj = field.select_one("b").get_text()
             name = obj.split(" - ")[-1]
             abbrv = obj.split(" - ")[0]
-            subsubfields_list.append({
-                "name": name,
-                "abbrv": abbrv,
-            })
+            subsubfields_list.append(
+                {
+                    "name": name,
+                    "abbrv": abbrv,
+                }
+            )
     except:
         pass
     return subsubfields_list
 
 
-def get_fields(url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_topics.json"):
-    response = urllib.request.urlopen(url, headers={'User-Agent': random.choice(user_agents)})
+def get_fields(
+    url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_topics.json"
+):
+    response = urllib.request.urlopen(
+        url, headers={"User-Agent": random.choice(user_agents)}
+    )
     soup = BeautifulSoup(response.text, "html.parser")
-    
+
     fields = soup.select("main div#content h2")[:-1]
-    
+
     fields_list = []
     for field in fields:
         subfields = field.next_sibling.next_sibling.select("li")
@@ -69,17 +79,21 @@ def get_fields(url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_to
             sub = f.select_one("a")
             abbrv = f.select_one("strong").get("id")
             main_url = urljoin(url, f"/archive/{abbrv}")
-            subfields_list.append({
-                "name": sub.text,
-                "abbrv": abbrv,
-                "sub_fields": get_subsubfields(main_url)
-            })
+            subfields_list.append(
+                {
+                    "name": sub.text,
+                    "abbrv": abbrv,
+                    "sub_fields": get_subsubfields(main_url),
+                }
+            )
 
-        fields_list.append({
-            "name": field.text,
-            "sub_fields": subfields_list,
-        })
-    
+        fields_list.append(
+            {
+                "name": field.text,
+                "sub_fields": subfields_list,
+            }
+        )
+
     with open(path, "w") as file:
         json_data = json.dumps(fields_list, indent=4)
         file.write(json_data)
@@ -89,10 +103,14 @@ def get_fields(url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_to
 def load_fields(fields: list, parent_field: PaperTopic = None):
     for field in fields:
         if parent_field:
-            topic = PaperTopic.objects.create(name=field["name"], abbrv=field.get("abbrv", None), parent=parent_field)
+            topic = PaperTopic.objects.create(
+                name=field["name"], abbrv=field.get("abbrv", None), parent=parent_field
+            )
         else:
-            topic = PaperTopic.objects.create(name=field["name"], abbrv=field.get("abbrv", None))
-        
+            topic = PaperTopic.objects.create(
+                name=field["name"], abbrv=field.get("abbrv", None)
+            )
+
         sub_fields = field.get("sub_fields", [])
         if sub_fields:
             load_fields(sub_fields, topic)
@@ -102,7 +120,9 @@ def _download_new_papers(field_abbr, path):
     NEW_SUB_URL = (
         f"https://arxiv.org/list/{field_abbr}/new"  # https://arxiv.org/list/cs/new
     )
-    page = urllib.request.urlopen(NEW_SUB_URL, headers={'User-Agent': random.choice(user_agents)})
+    page = urllib.request.urlopen(
+        NEW_SUB_URL, headers={"User-Agent": random.choice(user_agents)}
+    )
     soup = BeautifulSoup(page, "html.parser")
     content = soup.body.find("div", {"id": "content"})
 
@@ -146,10 +166,14 @@ def _download_new_papers(field_abbr, path):
             dd_list[i].find("p", {"class": "mathjax"}).text.replace("\n", " ").strip()
         )
         paper["paper_number"] = paper_number
-        paper["google_scholar"] = f"https://scholar.google.com/scholar_lookup?arxiv_id={paper_number}"
-        paper["semantic_scholar"] = f"https://api.semanticscholar.org/arXiv:{paper_number}"
+        paper["google_scholar"] = (
+            f"https://scholar.google.com/scholar_lookup?arxiv_id={paper_number}"
+        )
+        paper["semantic_scholar"] = (
+            f"https://api.semanticscholar.org/arXiv:{paper_number}"
+        )
         new_paper_list.append(paper)
-    
+
     #  check if ./data exist, if not, create it
     if not os.path.exists(path):
         os.makedirs(path)
@@ -187,19 +211,19 @@ def load_papers(result, topic_id):
 
             if created:
                 new_papers.append(paper)
-    
+
     print(f"Saved {len(new_papers)} new papers with topic id: {topic_id}")
     embed_papers.s(new_papers)
     return result
 
 
 def get_papers(limit=None, path="newsletter/utils/data/papers"):
-    
+
     results = []
 
     topics = PaperTopic.objects.all()
     threads = []
-    
+
     for topic in topics:
         if topic.abbrv:
             date = datetime.date.fromtimestamp(
@@ -228,11 +252,10 @@ def get_papers(limit=None, path="newsletter/utils/data/papers"):
     return results
 
 
-
 if __name__ == "__main__":
     # fields = get_fields()
-    
+
     # load_fields(fields)
-    
+
     papers = get_papers("cs.AI")
     print(papers)

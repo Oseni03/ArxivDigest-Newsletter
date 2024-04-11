@@ -18,12 +18,15 @@ from subscription.models import Price
 
 class CustomUserManager(BaseUserManager):
     """Custome user manager."""
+
     def create_user(self, email, password=None, **extra_kwargs):
         """Create and saves a User with the given email and password."""
         if not email:
             raise ValueError("Users must have an email address")
 
-        user = self.model(email=self.normalize_email(email),)
+        user = self.model(
+            email=self.normalize_email(email),
+        )
 
         user.set_password(password)
         user.save(using=self._db)
@@ -44,6 +47,7 @@ class CustomUserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model representing user in the system."""
+
     email = models.EmailField(
         verbose_name="Email",
         max_length=255,
@@ -53,20 +57,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    # Subscriber 
+
+    # Subscriber
     token = models.CharField(max_length=128, unique=True, default=uuid.uuid4)
     verified = models.BooleanField(default=False)
     verification_sent_date = models.DateTimeField(blank=True, null=True)
-    
+
     # newsletters
-    subscribed_topics = models.ManyToManyField(PaperTopic, related_name="users", through="Subscription")
-    
+    subscribed_topics = models.ManyToManyField(
+        PaperTopic, related_name="users", through="Subscription"
+    )
+
     # subscription
     is_paid_subscriber = models.BooleanField(default=False)
     plan = models.ForeignKey(Price, on_delete=models.SET_NULL, null=True)
     customer_id = models.CharField(max_length=300, null=True, blank=True)
-    
+
     objects = CustomUserManager()
     USERNAME_FIELD = "email"
 
@@ -89,19 +95,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Check if the user a member of staff."""
         # Simplest possible answer: All admins are staff
         return self.is_admin
-    
+
     @property
     def subscribed(self):
         return self.filter(verified=True, is_active=True)
-    
+
     def token_expired(self):
         if not self.verification_sent_date:
             return True
-    
-        expiration_date = (
-            self.verification_sent_date + timezone.timedelta(
-                days=settings.NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
-            )
+
+        expiration_date = self.verification_sent_date + timezone.timedelta(
+            days=settings.NEWSLETTER_EMAIL_CONFIRMATION_EXPIRE_DAYS
         )
         return expiration_date <= timezone.now()
 
@@ -110,27 +114,25 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         while self.__class__.objects.filter(token=unique_token).exists():
             unique_token = str(uuid.uuid4())
-        
+
         self.token = unique_token
         self.save()
-    
+
     def unsubscribe(self):
         from . import signals
-        
+
         if self.is_active:
             self.is_active = False
             self.verified = False
             self.save()
 
-            signals.unsubscribed.send(
-                sender=self.__class__, instance=self
-            )
+            signals.unsubscribed.send(sender=self.__class__, instance=self)
 
             return True
-    
+
     def send_verification_email(self, created):
         from . import signals
-        
+
         minutes_before = timezone.now() - timezone.timedelta(minutes=5)
         sent_date = self.verification_sent_date
 
@@ -145,19 +147,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.save()
 
         send_subscription_verification_email(
-            self.get_verification_url(), 
+            self.get_verification_url(),
             self.email_address,
         )
-        signals.email_verification_sent.send(
-            sender=self.__class__, instance=self
-        )
+        signals.email_verification_sent.send(sender=self.__class__, instance=self)
 
     def get_verification_url(self):
         return reverse(
-            'newsletter:newsletter_subscription_confirm',
-            kwargs={'token': self.token}
+            "newsletter:newsletter_subscription_confirm", kwargs={"token": self.token}
         )
-    
+
     def subscribed_to(self, topic: PaperTopic):
         return topic in self.subscribed_topics.all()
 
@@ -170,11 +169,17 @@ class Schedule(models.TextChoices):
 
 
 class Subscription(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscriptions")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="subscriptions"
+    )
     topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
-    schedule = models.CharField(max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY)
+    schedule = models.CharField(
+        max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        models.UniqueConstraint(fields=['user', 'topic'], name='unique_user_subscription')
+        models.UniqueConstraint(
+            fields=["user", "topic"], name="unique_user_subscription"
+        )

@@ -4,8 +4,8 @@
 from __future__ import absolute_import, unicode_literals
 
 # The application will always be imported as a result of this.
-#Django launches so that shared taskS can use this application.- django redis
+# Django launches so that shared taskS can use this application.- django redis
 
 from .celery import app as celery_app
 
-__all__ = ('celery_app',)
+__all__ = ("celery_app",)

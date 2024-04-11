@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Alert
 from .forms import AlertForm
 
+
 # Create your views here.
 class AlertView(LoginRequiredMixin, View):
 

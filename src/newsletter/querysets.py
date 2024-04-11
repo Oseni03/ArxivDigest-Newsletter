@@ -5,7 +5,7 @@ from django.utils import timezone
 class PaperTopicQuerySet(models.QuerySet):
 
     use_for_related_fields = True
-    
+
     def parents(self):
         return self.filter(level=0)
 

@@ -14,9 +14,9 @@ class AINewsletterAgents:
             not only informs but also engage and inspires the readers.""",
             allow_delegation=True,
             verbose=True,
-            max_iter=15
+            max_iter=15,
         )
-    
+
     def papers_fetcher_agent(self):
         return Agent(
             role="PapersFetcher",
@@ -26,7 +26,7 @@ class AINewsletterAgents:
             verbose=True,
             allow_delegation=True,
         )
-    
+
     def papers_analyzer_agent(self):
         return Agent(
             role="NewsAnalyzer",
@@ -37,7 +37,7 @@ class AINewsletterAgents:
             verbose=True,
             allow_delegation=True,
         )
-    
+
     def newsletter_compiler_agent(self):
         return Agent(
             role="NewsletterCompiler",

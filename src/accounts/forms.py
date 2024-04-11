@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import password_validation
-from django.core.exceptions import ValidationError 
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from .models import User
@@ -13,18 +13,15 @@ class UserCreationForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         help_text=password_validation.password_validators_help_text_html(),
     )
-    
+
     class Meta:
         model = User
         fields = ("email",)
-        
+
     def clean_email(self):
         """Reject emails that differ only in case."""
         email = self.cleaned_data.get("email")
-        if (
-            email
-            and self._meta.model.objects.filter(email__iexact=email).exists()
-        ):
+        if email and self._meta.model.objects.filter(email__iexact=email).exists():
             self._update_errors(
                 ValidationError(
                     {

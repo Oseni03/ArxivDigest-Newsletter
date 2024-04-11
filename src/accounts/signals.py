@@ -26,6 +26,7 @@ snoozed = Signal()
 
 User = get_user_model()
 
+
 @receiver(post_save, sender=User)
 def create_stripe_customer(sender, instance, created, **kwargs):
     if created:
@@ -41,13 +42,13 @@ def create_stripe_customer(sender, instance, created, **kwargs):
 def user_verification(sender, instance, created, **kwargs):
     if created:
         if settings.NEWSLETTER_SEND_VERIFICATION:
-            instance.send_verification_email(created, instance.request.tenant.schema_name)
+            instance.send_verification_email(
+                created, instance.request.tenant.schema_name
+            )
         else:
             instance.verified = True
             instance.is_active = True
             instance.save()
-    
-            subscribed.send(
-                sender=instance.__class__, instance=instance
-            )
+
+            subscribed.send(sender=instance.__class__, instance=instance)
             send_welcome_email(instance.email)

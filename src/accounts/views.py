@@ -11,16 +11,17 @@ from .models import User
 from .forms import UserCreationForm
 from newsletter.forms import SubscriberEmailForm
 
+
 # Create your views here.
 class RegisterView(View):
     template_name = "accounts/register.html"
     form_class = UserCreationForm
     success_url = reverse_lazy("accounts:login")
-    
+
     def get(self, request, *args, **kwargs):
         form = UserCreationForm()
         return render(request, self.template_name, {"form": form})
-    
+
     def post(self, request, *args, **kwargs):
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -47,8 +48,8 @@ class ResendVerification(View):
 class SubscriptionConfirmView(DetailView):
     template_name = "accounts/subscription_confirm.html"
     model = User
-    slug_url_kwarg = 'token'
-    slug_field = 'token'
+    slug_url_kwarg = "token"
+    slug_field = "token"
 
     def get_queryset(self):
         return super().get_queryset().filter(verified=False)
@@ -57,16 +58,13 @@ class SubscriptionConfirmView(DetailView):
         self.object = self.get_object()
         subscribed = self.object.subscribe()
 
-        context = self.get_context_data(
-            object=self.object, 
-            subscribed=subscribed
-        )
+        context = self.get_context_data(object=self.object, subscribed=subscribed)
         return self.render_to_response(context)
 
 
 class UnsubscribeView(View):
     template_name = "accounts/unsubscribe.html"
-    
+
     def get(self, request, user_id, *args, **kwargs):
         user = get_object_or_404(User, id=user_id)
         context = {
@@ -79,4 +77,3 @@ class UnsubscribeView(View):
         user = get_object_or_404(User, id=user_id)
         user.unsubscribe()
         return render(request, "accounts/unsubscribe_successful.html")
-

@@ -13,7 +13,11 @@ urlpatterns = [
         name="paper_detail",
     ),
     path("newsletters/", views.NewsletterListView.as_view(), name="newsletters"),
-    path("topic-subscription/<topic_abbrv>/", views.topic_subscription, name="topic-subscription"),
+    path(
+        "topic-subscription/<topic_abbrv>/",
+        views.topic_subscription,
+        name="topic-subscription",
+    ),
     path(
         "subscribe/",
         views.NewsletterSubscribeView.as_view(),

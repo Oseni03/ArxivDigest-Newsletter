@@ -20,7 +20,7 @@ from alert.models import Alert
 
 class HomeView(View):
     template_name = "newsletter/home.html"
-    
+
     def get(self, request, *args, **kwargs):
         context = {}
         papers = Paper.objects.visible()
@@ -95,7 +95,9 @@ def topic_subscription(request, topic_abbrv: str):
         }
         return render(request, "newsletter/partials/_newsletter_list.html", context)
     else:
-        return render(request, "newsletter/partials/_topic_header.html", {"topic": topic})
+        return render(
+            request, "newsletter/partials/_topic_header.html", {"topic": topic}
+        )
 
 
 class NewsletterSubscribeView(View):

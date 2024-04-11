@@ -6,6 +6,7 @@ from langchain_community.vectorstores.pgvector import (
 from langchain_core.documents import Document
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
+
 # from dotenv import load_dotenv
 import logging
 
