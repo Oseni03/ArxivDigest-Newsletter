@@ -169,7 +169,7 @@ class Subscription(models.Model):
         BI_WEEKLY = "BI_WEEKLY", _("Bi Weekly")
         TRI_WEEKLY = "TRI_WEEKLY", _("Tri Weekly")
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscriptions")
     topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
     schedule = models.CharField(max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY)
     created_at = models.DateTimeField(auto_now_add=True)

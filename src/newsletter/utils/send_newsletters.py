@@ -1,5 +1,6 @@
 import logging
 import time
+from typing import List
 
 from django.conf import settings
 from django.core.mail import EmailMessage, get_connection
@@ -8,7 +9,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
-from newsletter.models import Newsletter
+from accounts.models import Subscription
+from newsletter.models import Newsletter, Paper, PaperTopic
 
 User = get_user_model()
 
@@ -19,18 +21,16 @@ logger = logging.getLogger(__name__)
 class NewsletterEmailSender:
     """The main class that handles sending email newsletters"""
 
-    def __init__(self, newsletters=None, respect_schedule=True):
-        self.newsletters = self._get_newsletters(
-            newsletters=newsletters, respect_schedule=respect_schedule
+    def __init__(self, topics: List[PaperTopic] = None, schedule: Subscription.Schedule = None):
+        self.topics = self._get_topics(
+            topics=topics, schedule=schedule
         )
-        # get subscriber email addresses
-        self.subscriber_emails = User.objects.subscribed().values_list(
-            'email', flat=True
-        )
+        # Schedule
+        self.schedule = schedule
         # Size of each batch to be sent
         self.batch_size = settings.NEWSLETTER_EMAIL_BATCH_SIZE
-        # list of newsletters that were sent
-        self.sent_newsletters = []
+        # list of topics that were sent
+        self.sent_topics = []
         # Waiting time after each batch (in seconds)
         self.per_batch_wait = settings.NEWSLETTER_EMAIL_BATCH_WAIT
         # connection to the server
@@ -38,38 +38,30 @@ class NewsletterEmailSender:
         self.email_host_user = settings.EMAIL_HOST_USER
 
     @staticmethod
-    def _get_newsletters(newsletters=None, respect_schedule=True):
+    def _get_topics(topics=None, schedule=None):
         """
-        gets newsletters to be sent
+        gets topics to be sent
 
-        :param newsletters: Newsletter QuerySet
-        :param respect_schedule: if ``True`` newsletters with future schedule
+        :param topics: Newsletter QuerySet
+        :param schedule: Subscription.Schedule instance
             will not be sent
         """
-        now = timezone.now()
 
-        if newsletters is None:
-            newsletters = Newsletter.objects.filter(
-                is_sent=False, issue__is_draft=False,
-                issue__publish_date__lte=now
-            )
+        if topics is None:
+            topics = PaperTopic.objects.all()
 
-        if respect_schedule:
-            newsletters = newsletters.filter(schedule__lte=now)
-
-        return newsletters.select_related('issue')
+        return topics
 
     @staticmethod
-    def _render_newsletter(newsletter):
-        """renders newsletter template and returns html and subject"""
-        issue = newsletter.issue
-        subject = newsletter.subject
-        posts = issue.posts.visible().select_related('category')
+    def _render_newsletter(topic: PaperTopic, user):
+        """renders newsletter template and returns Newsletter object"""
+        subject = f"ArxivDigest - {topic.name}"
+        papers = Paper.objects.filter(topics=topic, is_visible=True)
 
         context = {
-            'issue': issue,
-            'post_list': posts,
-            'unsubscribe_url': reverse('newsletter:newsletter_unsubscribe'),
+            'topic': topic,
+            'papers': papers,
+            'unsubscribe_url': reverse('accounts:unsubscribe', args=(user.id,)),
             'site_url': settings.NEWSLETTER_SITE_BASE_URL
         }
 
@@ -77,10 +69,11 @@ class NewsletterEmailSender:
             'newsletter/email/newsletter_email.html', context
         )
 
-        rendered_newsletter = {
-            'subject': subject,
-            'html': html
-        }
+        rendered_newsletter = Newsletter.objects.create(
+            topic=topic,
+            subject=subject,
+            content=html,
+        )
 
         return rendered_newsletter
 
@@ -101,54 +94,54 @@ class NewsletterEmailSender:
 
         return message
 
-    def _get_batch_email_messages(self, rendered_newsletter):
+    def _get_batch_email_messages(self, topic: PaperTopic):
         """
         Yields EmailMessage list in batches
 
-        :param rendered_newsletter: newsletter with html and subject
+        :param topic: PaperTopic object/instance
         """
 
+        subscriber_emails = User.objects.filter(subscriptions__topic=topic, subscriptions__schedule=self.schedule)
+
         # if there is no user then stop iteration
-        if len(self.subscriber_emails) == 0:
+        if len(subscriber_emails) == 0:
             logger.info('No user found.')
             return
 
         # if there is no batch size specified
         # by the user send all in one batch
         if not self.batch_size or self.batch_size <= 0:
-            self.batch_size = len(self.subscriber_emails)
+            self.batch_size = len(subscriber_emails)
 
         logger.info(
             'Batch size for sending emails is set to %s',
             self.batch_size
         )
 
-        for i in range(0, len(self.subscriber_emails), self.batch_size):
-            emails = self.subscriber_emails[i:i + self.batch_size]
+        for i in range(0, len(subscriber_emails), self.batch_size):
+            users = subscriber_emails[i:i + self.batch_size]
 
             yield map(
-                lambda email: self._generate_email_message(
-                    email, rendered_newsletter
-                ), emails
+                lambda user: self._generate_email_message(
+                    user.email, self._render_newsletter(topic, user)
+                ), users
             )
 
     def send_emails(self):
         """sends newsletter emails to subscribers"""
-        for newsletter in self.newsletters:
-            issue_number = newsletter.issue.issue_number
+        for topic in self.topics:
+            # issue_number = newsletter.issue.issue_number
             # this is used to calculate how many emails were
             # sent for each newsletter
             sent_emails = 0
 
-            rendered_newsletter = self._render_newsletter(newsletter)
-
             logger.info(
-                'Ready to send newsletter for ISSUE # %s',
-                issue_number
+                'Ready to send newsletter for TOPIC # %s',
+                topic.abbrv
             )
 
             for email_messages in self._get_batch_email_messages(
-                rendered_newsletter
+                topic
             ):
                 messages = list(email_messages)
 
@@ -157,8 +150,8 @@ class NewsletterEmailSender:
                     sent = self.connection.send_messages(messages)
 
                     logger.info(
-                        'Sent %s newsletters in one batch for ISSUE # %s',
-                        len(messages), issue_number
+                        'Sent %s newsletters in one batch for TOPIC # %s',
+                        len(messages), topic.abbrv
                     )
 
                     sent_emails += sent
@@ -167,43 +160,45 @@ class NewsletterEmailSender:
                     self.connection = get_connection()
                     logger.error(
                         'An error occurred while sending '
-                        'newsletters for ISSUE # %s '
-                        'newsletter ID: %s '
+                        'newsletters for TOPIC # %s '
                         'EXCEPTION: %s',
-                        issue_number, newsletter.id, e
+                        topic.abbrv, e
                     )
                 finally:
                     # Wait sometime before sending next batch
                     # this is to prevent server overload
                     logger.info(
                         'Waiting %s seconds before sending '
-                        'next batch of newsletter for ISSUE # %s',
-                        self.per_batch_wait, issue_number
+                        'next batch of newsletter for ISSUE # %s'
+                        'Schedule %s',
+                        self.per_batch_wait, self.schedule, topic.abbrv
                     )
                     time.sleep(self.per_batch_wait)
 
             if sent_emails > 0:
-                self.sent_newsletters.append(newsletter.id)
+                self.sent_topics.append(topic.abbrv)
 
             logger.info(
-                'Successfully Sent %s email(s) for ISSUE # %s ',
-                sent_emails, issue_number
+                'Successfully Sent %s email(s) for TOPIC # %s ',
+                sent_emails, topic.abbrv
             )
 
         # Save newsletters to sent state
-        Newsletter.objects.filter(
-            id__in=self.sent_newsletters
-        ).update(is_sent=True, sent_at=timezone.now())
+        # Newsletter.objects.filter(
+        #     id__in=self.sent_topics
+        # ).update(is_sent=True, sent_at=timezone.now())
 
         logger.info(
             'Newsletter sending process completed. '
-            'Successfully sent newsletters with ID %s', self.sent_newsletters
+            'Successfully sent newsletters with ID %s', self.sent_topics
         )
 
 
-def send_email_newsletter(newsletters=None, respect_schedule=True):
+def send_email_newsletter(topics=None, schedule: Subscription.Schedule = Subscription.Schedule.DAILY):
+    logger.info(f"About to send out newsletter for {schedule} schedule")
     send_newsletter = NewsletterEmailSender(
-        newsletters=newsletters,
-        respect_schedule=respect_schedule
+        topics=topics,
+        schedule=schedule
     )
     send_newsletter.send_emails()
+    logger.info(f"Successfully sent out newsletters for {schedule} schedule")

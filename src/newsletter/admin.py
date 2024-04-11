@@ -6,12 +6,12 @@ from mptt.admin import MPTTModelAdmin
 
 
 class NewsletterAdmin(admin.ModelAdmin):
-    prepopulated_fields = {"slug": ["title"]}
+    prepopulated_fields = {"slug": ["subject"]}
     date_hierarchy = 'created_at'
     list_display = (
-        'title', 'topic', 'schedule', 'sent_at',
+        'subject', 'topic', 'schedule', 'sent_at',
     )
-    search_fields = ('topic', 'title')
+    search_fields = ('topic', 'subject')
     readonly_fields = ('created_at', 'sent_at',)
     sortable_by = ('schedule', 'sent_at', 'created_at')
 

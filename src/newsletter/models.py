@@ -78,7 +78,7 @@ class Paper(models.Model):
 
 class Newsletter(models.Model):
     topic = models.ForeignKey(PaperTopic, related_name="newsletter", on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
+    subject = models.CharField(max_length=255)
     content = RichTextField()
     schedule = models.DateTimeField(blank=True, null=True)
     sent_at = models.DateTimeField(blank=True, null=True)
@@ -88,8 +88,8 @@ class Newsletter(models.Model):
     def __str__(self):
         return str(self.topic)
     
-    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None: # type: ignore
+    def save(self, **kwargs) -> None:
         if not self.slug:
-            self.slug = slugify(self.title)
-        return super().save(force_insert, force_update, using, update_fields)
+            self.slug = slugify(self.subject)
+        return super().save(**kwargs)
     
