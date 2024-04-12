@@ -31,3 +31,13 @@ jobs:
                 STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
                 DOMAIN_URL: ${{ secrets.DOMAIN_URL }}
                 GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+            - name: Send newsletters
+              run: |
+                python src/manage.py send_newsletter DAILY
+              env:
+                DEBUG: ${{ secrets.DEBUG }}
+                SECRET_KEY: ${{ secrets.SECRET_KEY }}
+                STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+                STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+                DOMAIN_URL: ${{ secrets.DOMAIN_URL }}
+                GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
