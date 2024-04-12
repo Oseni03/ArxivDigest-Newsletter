@@ -31,3 +31,4 @@ jobs:
                 STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
                 DOMAIN_URL: ${{ secrets.DOMAIN_URL }}
                 GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+                EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
