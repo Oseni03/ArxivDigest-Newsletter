@@ -1,12 +1,12 @@
 name: fridaypipeline
 
 on:
+    workflow_dispatch:
     schedule:
         # * is a special character in YAML so you have to quote this string
         # Feel free to change this cron schedule
         # Currently its scheduled for 00:10, only on Fri
         - cron: "10 0 * * 5"
-    # workflow_Dispatch: {}
 
 jobs:
     send_friday_newsletter:
@@ -32,3 +32,8 @@ jobs:
                 DOMAIN_URL: ${{ secrets.DOMAIN_URL }}
                 GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
                 EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v3
+              with:
+                name: digest.html
+                path: digest.html

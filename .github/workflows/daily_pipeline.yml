@@ -1,12 +1,12 @@
 name: dailypaperextractor
 
 on:
+    workflow_dispatch:
     schedule:
         # * is a special character in YAML so you have to quote this string
         # Feel free to change this cron schedule
         # Currently its scheduled for 00:00, Mon-Fri
         - cron: "0 0 * * 1-5"
-    # workflow_Dispatch: {}
 
 jobs:
     extract_and_send_daily_newsletter:
@@ -42,3 +42,8 @@ jobs:
                 DOMAIN_URL: ${{ secrets.DOMAIN_URL }}
                 GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
                 EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v3
+              with:
+                name: digest.html
+                path: digest.html
