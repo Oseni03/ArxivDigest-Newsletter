@@ -164,11 +164,11 @@ class NewsletterEmailSender:
                     # this is to prevent server overload
                     logger.info(
                         "Waiting %s seconds before sending "
-                        "next batch of newsletter for ISSUE # %s"
+                        "next batch of newsletter for TOPIC # %s"
                         "Schedule %s",
                         self.per_batch_wait,
-                        self.schedule,
                         topic.abbrv,
+                        self.schedule,
                     )
                     time.sleep(self.per_batch_wait)
 

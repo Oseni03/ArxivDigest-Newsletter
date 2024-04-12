@@ -12,7 +12,7 @@ class Alert(models.Model):
     schedule = models.CharField(
         max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY
     )
-    papers = models.ManyToManyField(Paper)
+    papers = models.ManyToManyField(Paper, related_name="alerts")
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
 

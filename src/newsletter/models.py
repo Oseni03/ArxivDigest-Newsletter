@@ -84,16 +84,22 @@ class Paper(models.Model):
         return super().save()
 
 
+from alert.models import Alert
+
 class Newsletter(models.Model):
     topic = models.ForeignKey(
-        PaperTopic, related_name="newsletter", on_delete=models.CASCADE
+        PaperTopic, related_name="newsletters", on_delete=models.CASCADE, null=True
+    )
+    alert = models.ForeignKey(
+        Alert, related_name="newsletters", on_delete=models.CASCADE, null=True
     )
     subject = models.CharField(max_length=255)
     content = RichTextField()
     schedule = models.DateTimeField(blank=True, null=True)
+    is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
     def __str__(self):
         return str(self.topic)
