@@ -20,7 +20,7 @@ Confirm Subscription
     <div class="container text-primary text-center py-3 py-md-5">
         <div class="py-5">
             <h2>Now that you're in-</h2>
-            <h2>this is what your newsletter schedule going to be like:</h2>
+            <a class="btn btn-lg btn-outline-primary rounded-0 my-3" href="{% url "newsletter:newsletters" %}">Manage newsletter</a>
         </div>
     </div>
 {% else %}
@@ -30,10 +30,10 @@ Confirm Subscription
             <p>Subscription confirmation link has expired or is invalid.</p>
             <p>Please click on the button below to receive an e-mail with a new confirmation link.</p>
             
-            <form method="post" action="{% url 'newsletter:newsletter_subscribe_resend' %}">
+            <form method="post" action="{% url 'accounts:resend-confirmation' %}">
                 {% csrf_token %}
                 <input type="hidden" name="email_address" required id="id_email_address" value="{{ object.email_address }}">
-                <button class="btn btn-outline-primary btn-lg my-4" type="submit">Try Again</button>
+                <button class="btn btn-outline-primary btn-lg my-4" type="submit">Resend Confirmation</button>
             </form>
         </div>
     </div>

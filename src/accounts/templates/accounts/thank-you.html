@@ -8,7 +8,7 @@ Thank you for subscribing
 {% block content %}
     <div class="bg-primary text-white px-4 py-5 text-center">
         <div class="py-5">
-          <h1 class="display-5 fw-bold">Welcome to ArxivDigest</h1>
+          <h1 class="display-5 fw-bold">{% if created %} Welcome to ArxivDigest {% else %} Welcome to ArxivDigest {% endif %}</h1>
           <div class="col-lg-8 mx-auto">
             <p class="fs-5 mb-4">Congrats on joining the best research paper newsletter in the world.</p>
           </div>
@@ -16,16 +16,8 @@ Thank you for subscribing
     </div>
     
     <div class="container text-primary text-center py-3 py-md-5">
-        {% if send_verification %}
         <div class="py-5">
             <h2>Please check e-mail box to confirm your subscription and start receiving newsletter.</h2>
         </div>
-        {% else %}
-        <div class="py-5">
-            <h2>Manage subscription</h2>
-        </div>
-
-        {% include 'newsletter/partials/_newsletters_form.html' %}
-        {% endif %}
     </div>
 {% endblock %}

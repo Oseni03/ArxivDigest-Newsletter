@@ -22,6 +22,7 @@ class Email:
 
 
 def send_subscription_verification_email(verification_url, to_email):
+    print(verification_url, to_email)
     """
     Sends verification e-mail to subscribers
 

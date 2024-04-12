@@ -21,16 +21,12 @@ Sign in
                           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     {% endif %}
-                    <form action="{% url 'accounts:login' %}" method="post">
+                    <form action="{% url 'accounts:subscribe' %}" method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            {% render_field form.username class="form-control" placeholder="Enter email address" %}
-                        </div>
-                        <div class="mb-3">
-                            {% render_field form.password class="form-control" placeholder="Enter password" %}
+                            {% render_field subscription_form.email class="form-control" placeholder="Email address" aria-describedby="button-addon2" %}
                         </div>
                         <div class="d-grid">
-                            <p class="mb-3"><a class="fw-semibold link-offset-2 link-underline link-underline-opacity-0" href="{% url 'accounts:reset_password' %}">Forgot password?</a></p>
                             <button type="submit" class="btn btn-primary btn-lg rounded rounded-5">Sign in</button>
                         </div>
                         <div class="my-3 text-center">
@@ -58,9 +54,6 @@ Sign in
                         </div>
                     </form>
                 </div>
-            </div>
-            <div class="my-3 text-center">
-                <p class="fw-semibold">New to ArxivDigest?<a href="{% url 'accounts:register' %}"> Join now</a></p>
             </div>
         </div>
     </div> 

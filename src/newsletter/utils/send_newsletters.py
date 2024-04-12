@@ -21,7 +21,7 @@ class NewsletterEmailSender:
     """The main class that handles sending email newsletters"""
 
     def __init__(
-        self, topics: List[PaperTopic] = None, schedule: Subscription.Schedule = None
+        self, topics: List[PaperTopic] = None, schedule: Schedule = None
     ):
         self.topics = self._get_topics(topics=topics)
         # Schedule

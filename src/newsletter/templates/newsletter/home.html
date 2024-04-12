@@ -17,7 +17,7 @@
       </p>
       <div class="">
         <form
-          action="{% url 'newsletter:newsletter_subscribe' %}"
+          action="{% url 'accounts:subscribe' %}"
           method="post"
         >
           {% csrf_token %}

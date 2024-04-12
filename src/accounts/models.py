@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
-from .utils import send_subscription_verification_email
+from .utils import send_subscription_verification_email, send_welcome_email
 
 from newsletter.models import PaperTopic
 from subscription.models import Price
@@ -117,9 +117,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         self.token = unique_token
         self.save()
+    
+    def subscribe(self):
+        from accounts import signals
+
+        self.verified = True
+        self.is_active = True
+        self.save()
+        
+        signals.subscribed.send(sender=self.__class__, instance=self)
+        send_welcome_email(self.email)
+        return True
 
     def unsubscribe(self):
-        from . import signals
+        from accounts import signals
 
         if self.is_active:
             self.is_active = False
@@ -131,7 +142,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return True
 
     def send_verification_email(self, created):
-        from . import signals
+        from accounts import signals
 
         minutes_before = timezone.now() - timezone.timedelta(minutes=5)
         sent_date = self.verification_sent_date
@@ -148,13 +159,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         send_subscription_verification_email(
             self.get_verification_url(),
-            self.email_address,
+            self.email,
         )
         signals.email_verification_sent.send(sender=self.__class__, instance=self)
 
     def get_verification_url(self):
         return reverse(
-            "newsletter:newsletter_subscription_confirm", kwargs={"token": self.token}
+            "accounts:email-confirmation", kwargs={"token": self.token}
         )
 
     def subscribed_to(self, topic: PaperTopic):

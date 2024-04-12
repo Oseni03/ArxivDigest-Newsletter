@@ -18,10 +18,4 @@ urlpatterns = [
         views.topic_subscription,
         name="topic-subscription",
     ),
-    path(
-        "subscribe/",
-        views.NewsletterSubscribeView.as_view(),
-        name="newsletter_subscribe",
-    ),
-    path("thank-you/", views.ThankyouView.as_view(), name="thank-you"),
 ]
