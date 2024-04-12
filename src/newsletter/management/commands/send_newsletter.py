@@ -1,0 +1,21 @@
+from django.core.management.base import BaseCommand, CommandError, CommandParser
+
+from accounts.models import Schedule
+from newsletter.utils.send_newsletters import send_email_newsletter
+
+
+class Command(BaseCommand):
+    help ="Send newsletter for the specified schedule"
+
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument("schedule", choices=Schedule.choices)
+        return super().add_arguments(parser)
+    
+    def handle(self, *args, **options):
+        for schedule in options["schedule"]:
+            try:
+                send_email_newsletter(schedule=schedule)
+            except Exception as e:
+                raise CommandError("Schedule '%s' raised '%s' error" % schedule % e)
+            
+            self.style.SUCCESS("Successfully sent out newsletters for '%s' schedule" % schedule)
