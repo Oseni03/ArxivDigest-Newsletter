@@ -1,15 +1,15 @@
-name: dailypaperextractor
+name: fridaypipeline
 
 on:
     schedule:
         # * is a special character in YAML so you have to quote this string
         # Feel free to change this cron schedule
-        # Currently its scheduled for 00:00, Mon-Fri
-        - cron: "0 0 * * 1-5"
+        # Currently its scheduled for 00:10, only on Fri
+        - cron: "10 0 * * 5"
     # workflow_Dispatch: {}
 
 jobs:
-    extract_and_send_daily_newsletter:
+    send_friday_newsletter:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
@@ -21,19 +21,9 @@ jobs:
               run: |
                 python -m pip install --upgrade pip
                 pip install -r requirements.txt
-            - name: Load papers
+            - name: Send friday newsletters
               run: |
-                python src/manage.py load_papers
-              env:
-                DEBUG: ${{ secrets.DEBUG }}
-                SECRET_KEY: ${{ secrets.SECRET_KEY }}
-                STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
-                STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-                DOMAIN_URL: ${{ secrets.DOMAIN_URL }}
-                GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-            - name: Send newsletters
-              run: |
-                python src/manage.py send_newsletter DAILY
+                python src/manage.py send_newsletter BI_WEEKLY TRI_WEEKLY
               env:
                 DEBUG: ${{ secrets.DEBUG }}
                 SECRET_KEY: ${{ secrets.SECRET_KEY }}
