@@ -8,14 +8,14 @@ class Command(BaseCommand):
     help ="Send newsletter for the specified schedule"
 
     def add_arguments(self, parser: CommandParser) -> None:
-        parser.add_argument("schedule", choices=Schedule.choices)
+        parser.add_argument("schedule", type=str)
         return super().add_arguments(parser)
     
     def handle(self, *args, **options):
-        for schedule in options["schedule"]:
-            try:
-                send_email_newsletter(schedule=schedule)
-            except Exception as e:
-                raise CommandError("Schedule '%s' raised '%s' error" % schedule % e)
+        schedule = options["schedule"]
+        try:
+            send_email_newsletter(schedule=schedule)
+        except Exception as e:
+            raise CommandError(f"Schedule {schedule} raised '{e}' error")
             
-            self.style.SUCCESS("Successfully sent out newsletters for '%s' schedule" % schedule)
+        self.style.SUCCESS("Successfully sent out newsletters for '%s' schedule" % schedule)

@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from pytz import timezone
 
 from accounts.models import Schedule
 from newsletter.models import Newsletter, Paper
@@ -199,7 +200,7 @@ class NewsletterEmailSender:
 
         # Save newsletters to sent state
         Newsletter.objects.filter(id__in=self.sent_newsletters).update(
-            is_sent=True, sent_at=datetime.now()
+            is_sent=True, sent_at=datetime(2002, 10, 27, 6, 0, 0, tzinfo=timezone('UTC'))
         )
 
         print(

@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import time
 from typing import List
@@ -6,7 +7,9 @@ from django.conf import settings
 from django.core.mail import EmailMessage, get_connection
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from pytz import timezone
 
 from accounts.models import Schedule, Subscription
 from newsletter.models import Newsletter, Paper, PaperTopic
@@ -30,6 +33,8 @@ class NewsletterEmailSender:
         self.batch_size = settings.NEWSLETTER_EMAIL_BATCH_SIZE
         # list of topics that were sent
         self.sent_topics = []
+        # list of newsletters that were sent
+        self.sent_newsletters = []
         # Waiting time after each batch (in seconds)
         self.per_batch_wait = settings.NEWSLETTER_EMAIL_BATCH_WAIT
         # connection to the server
@@ -66,13 +71,14 @@ class NewsletterEmailSender:
 
         html = render_to_string("newsletter/email/newsletter_email.html", context)
 
-        rendered_newsletter = Newsletter.objects.create(
+        rendered_newsletter, created = Newsletter.objects.get_or_create(
             topic=topic,
             subject=subject,
             content=html,
+            slug=slugify(subject)
         )
 
-        return rendered_newsletter
+        return rendered_newsletter, created
 
     def _generate_email_message(self, to_email, rendered_newsletter):
         """
@@ -118,12 +124,19 @@ class NewsletterEmailSender:
         for i in range(0, len(subscriber_emails), self.batch_size):
             users = subscriber_emails[i : i + self.batch_size]
 
-            yield map(
-                lambda user: self._generate_email_message(
-                    user.email, self._render_newsletter(topic, user)
-                ),
-                users,
-            )
+            for user in users:
+                rendered_newsletter, created = self._render_newsletter(topic, user)
+                if created:
+                    pass
+                yield rendered_newsletter, self._generate_email_message(
+                    user.email, rendered_newsletter
+                )
+            # yield map(
+            #     lambda user: self._generate_email_message(
+            #         user.email, self._render_newsletter(topic, user)
+            #     ),
+            #     users,
+            # )
 
     def send_emails(self):
         """sends newsletter emails to subscribers"""
@@ -133,19 +146,21 @@ class NewsletterEmailSender:
             # sent for each newsletter
             sent_emails = 0
 
-            logger.info("Ready to send newsletter for TOPIC # %s", topic.abbrv)
+            logger.info("Ready to send newsletter for TOPIC # %s" % topic.abbrv)
 
-            for email_messages in self._get_batch_email_messages(topic):
-                messages = list(email_messages)
+            for newsletter, email_messages in self._get_batch_email_messages(topic):
+                try:
+                    messages = list(email_messages)
+                except:
+                    messages = [email_messages]
 
                 try:
                     # send mass email with one connection open
                     sent = self.connection.send_messages(messages)
 
                     logger.info(
-                        "Sent %s newsletters in one batch for TOPIC # %s",
-                        len(messages),
-                        topic.abbrv,
+                        "Sent %s newsletters in one batch for TOPIC # %s"
+                        % (len(messages), topic.abbrv)
                     )
 
                     sent_emails += sent
@@ -155,9 +170,8 @@ class NewsletterEmailSender:
                     logger.error(
                         "An error occurred while sending "
                         "newsletters for TOPIC # %s "
-                        "EXCEPTION: %s",
-                        topic.abbrv,
-                        e,
+                        "EXCEPTION: %s"
+                        % (topic.abbrv, e)
                     )
                 finally:
                     # Wait sometime before sending next batch
@@ -165,31 +179,36 @@ class NewsletterEmailSender:
                     logger.info(
                         "Waiting %s seconds before sending "
                         "next batch of newsletter for TOPIC # %s"
-                        "Schedule %s",
-                        self.per_batch_wait,
-                        topic.abbrv,
-                        self.schedule,
+                        "Schedule %s"
+                        % (self.per_batch_wait, topic.abbrv, self.schedule)
                     )
                     time.sleep(self.per_batch_wait)
+                
+                if sent > 0:
+                    self.sent_newsletters.append(newsletter.id)
+
+                print(
+                    "Successfully Sent %s email(s) for NEWSLETTER # %s "
+                    % (sent, newsletter.id)
+                )
 
             if sent_emails > 0:
                 self.sent_topics.append(topic.abbrv)
 
             logger.info(
-                "Successfully Sent %s email(s) for TOPIC # %s ",
-                sent_emails,
-                topic.abbrv,
+                "Successfully Sent %s email(s) for TOPIC # %s "
+                % (sent_emails, topic.abbrv)
             )
 
         # Save newsletters to sent state
-        # Newsletter.objects.filter(
-        #     id__in=self.sent_topics
-        # ).update(is_sent=True, sent_at=timezone.now())
+        Newsletter.objects.filter(
+            id__in=self.sent_newsletters
+        ).update(is_sent=True, sent_at=datetime(2002, 10, 27, 6, 0, 0, tzinfo=timezone('UTC')))
 
         logger.info(
             "Newsletter sending process completed. "
-            "Successfully sent newsletters with ID %s",
-            self.sent_topics,
+            "Successfully sent newsletters with ID %s"
+            % self.sent_topics
         )
 
 
