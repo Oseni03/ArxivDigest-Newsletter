@@ -11,7 +11,7 @@ from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from pytz import timezone
 
-from accounts.models import Schedule, Subscription
+from accounts.models import Schedule
 from newsletter.models import Newsletter, Paper, PaperTopic
 
 User = get_user_model()
@@ -66,7 +66,7 @@ class NewsletterEmailSender:
             "topic": topic,
             "papers": papers,
             "unsubscribe_url": reverse("accounts:unsubscribe", args=(user.id,)),
-            "site_url": settings.NEWSLETTER_SITE_BASE_URL,
+            "site_url": settings.DOMAIN_URL,
         }
 
         html = render_to_string("newsletter/email/newsletter_email.html", context)
@@ -88,8 +88,8 @@ class NewsletterEmailSender:
         :param rendered_newsletter: rendered html of the newsletter with subject
         """
         message = EmailMessage(
-            subject=rendered_newsletter.get("subject"),
-            body=rendered_newsletter.get("html"),
+            subject=rendered_newsletter.subject,
+            body=rendered_newsletter.content,
             from_email=self.email_host_user,
             to=[to_email],
             connection=self.connection,
@@ -111,7 +111,7 @@ class NewsletterEmailSender:
 
         # if there is no user then stop iteration
         if len(subscriber_emails) == 0:
-            logger.info("No user found.")
+            logger.warning("No user found.")
             return
 
         # if there is no batch size specified

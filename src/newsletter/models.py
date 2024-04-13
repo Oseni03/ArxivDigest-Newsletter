@@ -99,7 +99,7 @@ class Newsletter(models.Model):
     is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField()
 
     def __str__(self):
         return str(self.topic)
