@@ -111,7 +111,7 @@ class NewsletterEmailSender:
 
         # if there is no user then stop iteration
         if len(subscriber_emails) == 0:
-            logger.warning("No user found.")
+            logger.info("No user found.")
             return
 
         # if there is no batch size specified
@@ -203,7 +203,7 @@ class NewsletterEmailSender:
         # Save newsletters to sent state
         Newsletter.objects.filter(
             id__in=self.sent_newsletters
-        ).update(is_sent=True, sent_at=datetime(2002, 10, 27, 6, 0, 0, tzinfo=timezone('UTC')))
+        ).update(is_sent=True, sent_at=datetime.now(tz=timezone("UTC")))
 
         logger.info(
             "Newsletter sending process completed. "

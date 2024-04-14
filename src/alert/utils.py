@@ -17,7 +17,6 @@ from .models import Alert
 
 User = get_user_model()
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -200,7 +199,7 @@ class NewsletterEmailSender:
 
         # Save newsletters to sent state
         Newsletter.objects.filter(id__in=self.sent_newsletters).update(
-            is_sent=True, sent_at=datetime(2002, 10, 27, 6, 0, 0, tzinfo=timezone('UTC'))
+            is_sent=True, sent_at=datetime.now(tz=timezone("UTC"))
         )
 
         print(
