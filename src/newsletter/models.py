@@ -1,16 +1,43 @@
 # import hashid_field
+import html
+import re
 from typing import Iterable
+import uuid
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
+from pgvector.django import L2Distance, VectorField
+from sentence_transformers import SentenceTransformer
+from transformers import AutoTokenizer
+from vector_demonstration.common.models import AbstractBaseModel
+from vector_demonstration.utils.sites import get_site_url
+
 from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
 
 # from . import signals
 from .querysets import PaperQuerySet, PaperTopicQuerySet
+
+
+class AbstractBaseModel(models.Model):
+    """
+    An abstract model with fields/properties that should belong to all our models.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return "ah yes"
 
 
 class PaperTopic(MPTTModel):
@@ -39,7 +66,7 @@ class PaperTopic(MPTTModel):
         return reverse("newsletter:topic_detail", args=(self.abbrv,))
 
 
-class Paper(models.Model):
+class Paper(AbstractBaseModel):
     topics = models.ManyToManyField(PaperTopic, related_name="papers")
     title = models.CharField(max_length=255)
     authors = models.CharField(max_length=300)
@@ -71,6 +98,68 @@ class Paper(models.Model):
 
     def get_absolute_url(self):
         return reverse("newsletter:paper_detail", args=(self.paper_number,))
+    
+    def generate_embeddings(self):
+        def get_chunks(content, chunk_size=750):
+            """Naive chunking of job description.
+
+            `chunk_size` is the number of characters per chunk.
+            """
+            chunk_size = chunk_size
+            while content:
+                chunk, content = content[:chunk_size], content[chunk_size:]
+                yield chunk
+
+        # 1. Set up the embedding model
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+
+        # 2. Chunk the job description into sentences
+        chunk_embeddings = ((c, tokenizer.tokenize(c), model.encode(c)) for c in get_chunks(self.title + "\n" + self.abstract))
+
+        # 3. Save the embeddings information for each chunk
+        paper_chunks = []
+        for chunk_content, chunk_tokens, chunk_embedding in chunk_embeddings:
+            paper_chunks.append(
+                PaperChunks(
+                    paper=self,
+                    chunk=chunk_content,
+                    token_count=len(chunk_tokens),
+                    embedding=chunk_embedding,
+                )
+            )
+
+        PaperChunks.objects.bulk_create(paper_chunks)
+
+    @classmethod
+    def search(cls, query=None):
+        query = (
+            query
+            or "Creating effective LLM/AI agents"
+        )
+        # > expected result: list of Job Descriptions in descending order of relevance
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        query_embedding = model.encode(query)
+
+        paper_chunks = PaperChunks.objects.annotate(distance=L2Distance("embedding", query_embedding)).order_by("distance")
+
+        unique_papers = {}
+        for chunk in paper_chunks:
+            if chunk.paper.id not in unique_papers:
+                unique_papers[chunk.paper.id] = {
+                    "paper": chunk.paper,
+                    "chunks": [chunk],
+                }
+            else:
+                unique_papers[chunk.paper.id]["chunks"].append(chunk)
+
+        results = []
+        for k, v in unique_papers.items():
+            score = sum([c.distance for c in v["chunks"]]) / len(v["chunks"])
+            paper = v["paper"]
+            results.append(PaperSearchResult(score, paper, v["chunks"]))
+
+        return sorted(results, key=lambda r: r.score)
 
     def save(self):
         if not self.tex_source:
@@ -84,9 +173,30 @@ class Paper(models.Model):
         return super().save()
 
 
+class PaperChunks(AbstractBaseModel):
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name="chunks")
+    chunk = models.TextField()
+    token_count = models.IntegerField(null=True)
+    embedding = VectorField(dimensions=384)
+
+    def __str__(self):
+        return f"{self.paper.title} - {self.chunk[:50]}"
+
+
+class PaperSearchResult:
+    def __init__(self, score, paper, chunks):
+        self.score = score
+        self.paper = paper
+        self.chunks = chunks
+
+    def __str__(self):
+        return f"{self.score}: {self.paper.title}"
+
+
+
 from alert.models import Alert
 
-class Newsletter(models.Model):
+class Newsletter(AbstractBaseModel):
     topic = models.ForeignKey(
         PaperTopic, related_name="newsletters", on_delete=models.CASCADE, null=True
     )
@@ -99,7 +209,7 @@ class Newsletter(models.Model):
     is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    slug = models.SlugField()
+    slug = models.SlugField(unique=True)
 
     def __str__(self):
         return str(self.topic)

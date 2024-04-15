@@ -55,17 +55,15 @@ class NewsletterEmailSender:
             topics = PaperTopic.objects.all()
 
         return topics
-
+    
     @staticmethod
-    def _render_newsletter(topic: PaperTopic, user):
-        """renders newsletter template and returns Newsletter object"""
+    def _get_newsletter(topic: PaperTopic):
         subject = f"ArxivDigest - {topic.name}"
         papers = Paper.objects.filter(topics=topic, is_visible=True)
 
         context = {
             "topic": topic,
             "papers": papers,
-            "unsubscribe_url": reverse("accounts:unsubscribe", args=(user.id,)),
             "site_url": settings.DOMAIN_URL,
         }
 
@@ -80,7 +78,27 @@ class NewsletterEmailSender:
 
         return rendered_newsletter, created
 
-    def _generate_email_message(self, to_email, rendered_newsletter):
+    @staticmethod
+    def _render_newsletter(newsletter: Newsletter, user):
+        """renders newsletter template and returns html and subject"""
+        subject = newsletter.subject
+
+        context = {
+            'unsubscribe_url': reverse('accounts:unsubscribe', args=(user.id,)),
+        }
+
+        html = render_to_string(
+            newsletter.content, context
+        )
+
+        rendered_newsletter = {
+            'subject': subject,
+            'html': html
+        }
+
+        return rendered_newsletter
+
+    def _generate_email_message(self, to_email: str, rendered_newsletter: dict):
         """
         Generates email message for an email_address
 
@@ -88,17 +106,18 @@ class NewsletterEmailSender:
         :param rendered_newsletter: rendered html of the newsletter with subject
         """
         message = EmailMessage(
-            subject=rendered_newsletter.subject,
-            body=rendered_newsletter.content,
-            from_email=self.email_host_user,
-            to=[to_email],
-            connection=self.connection,
+            message = EmailMessage(
+            subject=rendered_newsletter.get('subject'),
+            body=rendered_newsletter.get('html'),
+            from_email=self.email_host_user, to=[to_email],
+            connection=self.connection
+        )
         )
         message.content_subtype = "html"
 
         return message
 
-    def _get_batch_email_messages(self, topic: PaperTopic):
+    def _get_batch_email_messages(self, newsletter: Newsletter):
         """
         Yields EmailMessage list in batches
 
@@ -106,7 +125,7 @@ class NewsletterEmailSender:
         """
 
         subscriber_emails = User.objects.filter(
-            subscriptions__topic=topic, subscriptions__schedule=self.schedule
+            subscriptions__topic=newsletter.topic, subscriptions__schedule=self.schedule
         )
 
         # if there is no user then stop iteration
@@ -124,19 +143,12 @@ class NewsletterEmailSender:
         for i in range(0, len(subscriber_emails), self.batch_size):
             users = subscriber_emails[i : i + self.batch_size]
 
-            for user in users:
-                rendered_newsletter, created = self._render_newsletter(topic, user)
-                if created:
-                    pass
-                yield rendered_newsletter, self._generate_email_message(
-                    user.email, rendered_newsletter
-                )
-            # yield map(
-            #     lambda user: self._generate_email_message(
-            #         user.email, self._render_newsletter(topic, user)
-            #     ),
-            #     users,
-            # )
+            yield map(
+                lambda user: self._generate_email_message(
+                    user.email, self._render_newsletter(newsletter, user)
+                ),
+                users,
+            )
 
     def send_emails(self):
         """sends newsletter emails to subscribers"""
@@ -146,13 +158,18 @@ class NewsletterEmailSender:
             # sent for each newsletter
             sent_emails = 0
 
+            newsletter, created = self._get_newsletter(topic)
+
             logger.info("Ready to send newsletter for TOPIC # %s" % topic.abbrv)
 
-            for newsletter, email_messages in self._get_batch_email_messages(topic):
-                try:
-                    messages = list(email_messages)
-                except:
-                    messages = [email_messages]
+            for email_messages in self._get_batch_email_messages(newsletter):
+                
+                messages = list(email_messages)
+
+                # try:
+                #     messages = list(email_messages)
+                # except:
+                #     messages = [email_messages]
 
                 try:
                     # send mass email with one connection open
@@ -193,7 +210,7 @@ class NewsletterEmailSender:
                 )
 
             if sent_emails > 0:
-                self.sent_topics.append(topic.abbrv)
+                self.sent_newsletters.append(newsletter)
 
             logger.info(
                 "Successfully Sent %s email(s) for TOPIC # %s "
@@ -208,7 +225,7 @@ class NewsletterEmailSender:
         logger.info(
             "Newsletter sending process completed. "
             "Successfully sent newsletters with ID %s"
-            % self.sent_topics
+            % self.sent_newsletters
         )
 
 
