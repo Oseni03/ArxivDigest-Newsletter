@@ -14,8 +14,6 @@ from langdetect.lang_detect_exception import LangDetectException
 from pgvector.django import L2Distance, VectorField
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
-from vector_demonstration.common.models import AbstractBaseModel
-from vector_demonstration.utils.sites import get_site_url
 
 from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
@@ -66,7 +64,7 @@ class PaperTopic(MPTTModel):
         return reverse("newsletter:topic_detail", args=(self.abbrv,))
 
 
-class Paper(AbstractBaseModel):
+class Paper(models.Model):
     topics = models.ManyToManyField(PaperTopic, related_name="papers")
     title = models.CharField(max_length=255)
     authors = models.CharField(max_length=300)
@@ -208,7 +206,6 @@ class Newsletter(AbstractBaseModel):
     schedule = models.DateTimeField(blank=True, null=True)
     is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True)
 
     def __str__(self):

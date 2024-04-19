@@ -21,6 +21,9 @@
 							type="checkbox"
 							value="{{ subtopic.abbrv }}"
 							id="defaultCheck1"
+							{% if not user.is_authenticated %}
+							disabled
+							{% endif %}
 							hx-trigger="click"
 							hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
 							hx-target="#newsletter-list"
@@ -40,6 +43,9 @@
 							type="checkbox"
 							value="{{ subsubtopic.abbrv }}"
 							id="defaultCheck1"
+							{% if not user.is_authenticated %}
+							disabled
+							{% endif %}
 							hx-trigger="click"
 							hx-post="{% url 'newsletter:topic-subscription' subsubtopic.abbrv %}"
 							hx-target="#newsletter-list"
@@ -59,6 +65,9 @@
 						type="checkbox"
 						value="{{ subtopic.abbrv }}"
 						id="{{ subtopic.abbrv }}"
+						{% if not user.is_authenticated %}
+						disabled
+						{% endif %}
 						hx-trigger="click"
 						hx-target="#newsletter-list"
 						hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
@@ -80,6 +89,9 @@
 				type="checkbox"
 				value="{{ topic.abbrv }}"
 				id="defaultCheck2"
+				{% if not user.is_authenticated %}
+				disabled
+				{% endif %}
 				hx-trigger="click"
               	hx-post="{% url 'newsletter:topic-subscription' topic.abbrv %}"
               	hx-target="#newsletter-list"
