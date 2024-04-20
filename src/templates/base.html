@@ -151,9 +151,11 @@
 		{% block content %} 
     {% endblock %} 
     
+	{% block footer %}
     {% include "partials/_footer.html" %}
-		<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-		<script src="{% static 'jquery.min.js' %}"></script>
-		{% block extra_js %} {% endblock %}
+	{% endblock %}
+	<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+	<script src="{% static 'jquery.min.js' %}"></script>
+	{% block extra_js %} {% endblock %}
 	</body>
 </html>
