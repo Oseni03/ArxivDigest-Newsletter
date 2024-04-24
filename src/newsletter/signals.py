@@ -11,3 +11,15 @@ def paper_abstract_summarizer(sender, instance, created, **kwargs):
         summary = summarizer(instance.abstract)
         instance.summary = summary
         instance.save()
+
+
+@receiver(post_save, sender=Paper)
+def paper_embedding_generator(sender, instance, created, **kwargs):
+    if created:
+        instance.generate_embeddings()
+
+
+@receiver(post_save, sender=Paper)
+def paper_get_similar_papers(sender, instance, created, **kwargs):
+    if created:
+        instance.get_similar_papers()

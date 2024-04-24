@@ -1,16 +1,10 @@
 # import hashid_field
-import html
-import re
-from typing import Iterable
 import uuid
 from django.db import models
 from django.urls import reverse
-from django.conf import settings
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from langdetect import detect
-from langdetect.lang_detect_exception import LangDetectException
 from pgvector.django import L2Distance, VectorField
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer
@@ -74,6 +68,7 @@ class Paper(models.Model):
     is_visible = models.BooleanField(default=True)
     abstract = models.TextField()
     summary = models.TextField(null=True)
+    similar_papers = models.ManyToManyField("self")
 
     # Access paper
     pdf_url = models.URLField(unique=True)
@@ -96,7 +91,12 @@ class Paper(models.Model):
 
     def get_absolute_url(self):
         return reverse("newsletter:paper_detail", args=(self.paper_number,))
-    
+    @classmethod
+    def get_query_embedding(cls, query):
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        query_embedding = model.encode(query)
+        return query_embedding
+
     def generate_embeddings(self):
         def get_chunks(content, chunk_size=750):
             """Naive chunking of job description.
@@ -108,12 +108,16 @@ class Paper(models.Model):
                 chunk, content = content[:chunk_size], content[chunk_size:]
                 yield chunk
 
-        # 1. Set up the embedding model
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+        # 1. Set up the tokenizer model
+        tokenizer = AutoTokenizer.from_pretrained(
+            "sentence-transformers/all-MiniLM-L6-v2"
+        )
 
-        # 2. Chunk the job description into sentences
-        chunk_embeddings = ((c, tokenizer.tokenize(c), model.encode(c)) for c in get_chunks(self.title + "\n" + self.abstract))
+        # 2. Chunk the paper description into sentences
+        chunk_embeddings = (
+            (c, tokenizer.tokenize(c), self.get_query_embedding(c))
+            for c in get_chunks(self.title + "\n" + self.abstract)
+        )
 
         # 3. Save the embeddings information for each chunk
         paper_chunks = []
@@ -131,15 +135,13 @@ class Paper(models.Model):
 
     @classmethod
     def search(cls, query=None):
-        query = (
-            query
-            or "Creating effective LLM/AI agents"
-        )
+        query = query or "Creating effective LLM/AI agents"
         # > expected result: list of Job Descriptions in descending order of relevance
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        query_embedding = model.encode(query)
+        query_embedding = cls.get_query_embedding(query)
 
-        paper_chunks = PaperChunks.objects.annotate(distance=L2Distance("embedding", query_embedding)).order_by("distance")
+        paper_chunks = PaperChunks.objects.annotate(
+            distance=L2Distance("embedding", query_embedding)
+        ).order_by("distance")
 
         unique_papers = {}
         for chunk in paper_chunks:
@@ -158,6 +160,21 @@ class Paper(models.Model):
             results.append(PaperSearchResult(score, paper, v["chunks"]))
 
         return sorted(results, key=lambda r: r.score)
+    
+    def get_similar_papers(self):
+        query_embedding = self.get_query_embedding(self.title)
+
+        paper_chunks = PaperChunks.objects.annotate(
+            distance=L2Distance("embedding", query_embedding)
+        ).order_by("distance")[:3]
+
+        unique_papers = []
+        for chunk in paper_chunks:
+            if chunk.paper.id not in unique_papers:
+                unique_papers.append(chunk.paper)
+        
+        self.similar_papers.add(unique_papers)
+        self.save()
 
     def save(self):
         if not self.tex_source:
@@ -191,8 +208,8 @@ class PaperSearchResult:
         return f"{self.score}: {self.paper.title}"
 
 
-
 from alert.models import Alert
+
 
 class Newsletter(AbstractBaseModel):
     topic = models.ForeignKey(
