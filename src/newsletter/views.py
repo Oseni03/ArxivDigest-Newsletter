@@ -1,4 +1,5 @@
 from typing import Any
+from django.db.models.query import QuerySet
 from django.urls import reverse
 from django.conf import settings
 from django.contrib import messages
@@ -50,6 +51,13 @@ class TopicDetailView(DetailView):
         return context
 
 
+def parent_topic_detail(request, id):
+    topic = PaperTopic.objects.get(id=id)
+    return render(
+        request, "newsletter/partials/_topic_list_modal.html", {"topic": topic}
+    )
+
+
 class PaperDetailView(DetailView):
     model = Paper
     template_name = "newsletter/paper_detail.html"
@@ -91,4 +99,3 @@ def topic_subscription(request, topic_abbrv: str):
         return render(
             request, "newsletter/partials/_topic_header.html", {"topic": topic}
         )
-

@@ -14,6 +14,11 @@ urlpatterns = [
     ),
     path("newsletters/", views.NewsletterListView.as_view(), name="newsletters"),
     path(
+        "topics/parent/<int:id>/",
+        views.parent_topic_detail,
+        name="parent-topic",
+    ),
+    path(
         "topic-subscription/<topic_abbrv>/",
         views.topic_subscription,
         name="topic-subscription",

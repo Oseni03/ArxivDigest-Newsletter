@@ -1,11 +1,12 @@
 {% extends "base.html" %} 
 {% load static %} 
 {% load widget_tweaks %} 
+{% load django_htmx %} 
 
 {% block title %} Newsletters and Alerts {% endblock %} 
 
 {% block content %}
-<div class="container">
+<div class="container mb-5 ">
 	<div class="text-center mt-4">
 		<h2 class="text-primary">Newsletters & Alerts</h2>
 		<h5 class="text-muted">Get the best of Arxiv in your inbox</h5>
@@ -26,4 +27,35 @@
 	</div>
 </div>
 {% include "alert/partials/_create_alert_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    ; (function () {
+      const modal = new bootstrap.Modal(document.getElementById("modal"))
+
+      htmx.on("htmx:afterSwap", (e) => {
+        // Response targeting #subtopics-modal => show the modal
+        if (e.detail.target.id == "subtopics-modal") {
+          modal.show()
+        }
+      })
+
+      htmx.on("htmx:beforeSwap", (e) => {
+        // Empty response targeting #subtopics-modal => hide the modal
+        if (e.detail.target.id == "subtopics-modal" && !e.detail.xhr.response) {
+          modal.hide()
+          e.detail.shouldSwap = false
+        }
+      })
+
+      // Remove dialog content after hiding
+      htmx.on("hidden.bs.modal", () => {
+        document.getElementById("subtopics-modal").innerHTML = ""
+      })
+    })()
+</script>
+{% endblock %}
+
+{% block footer %}
 {% endblock %}

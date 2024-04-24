@@ -1,0 +1,87 @@
+{% load static %}
+
+<form >
+	{% csrf_token %}
+	<div class="my-4">
+		<div>
+			<div class="d-flex justify-content-between">
+				<h5 class="fw-semibold">{{ topic.name|title }}</h5>
+			</div>
+			<div id="{{ topic.abbrv }}" class="ms-4">
+				{% for subtopic in topic.get_children %} 
+				{% if not subtopic.is_not_leaf_node %}
+				<div class="d-flex justify-content-between">
+					<div class="form-check">
+						<input
+							class="form-check-input"
+							name="categories"
+							type="checkbox"
+							value="{{ subtopic.abbrv }}"
+							id="defaultCheck1"
+							{% if not user.is_authenticated %}
+							disabled
+							{% endif %}
+							hx-trigger="click"
+							hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
+							hx-target="#newsletter-list"
+							{% if user.is_authenticated and subtopic in user.subscribed_topics.all %} checked {% endif %}
+						/>
+						<label class="form-check-label" for="defaultCheck1">
+							<a href="{{ subtopic.get_absolute_url }}">{{ subtopic.name|title }}</a>
+						</label>
+					</div>
+				</div>
+				<div id="{{ subsubtopic.abbrv }}" class="ms-4">
+					{% for subsubtopic in subtopic.get_children %}
+					<div class="form-check">
+						<input
+							class="form-check-input"
+							name="categories"
+							type="checkbox"
+							value="{{ subsubtopic.abbrv }}"
+							id="defaultCheck1"
+							{% if not user.is_authenticated %}
+							disabled
+							{% endif %}
+							hx-trigger="click"
+							hx-post="{% url 'newsletter:topic-subscription' subsubtopic.abbrv %}"
+							hx-target="#newsletter-list"
+							{% if user.is_authenticated and subsubtopic in user.subscribed_topics.all %} checked {% endif %}
+						/>
+						<label class="form-check-label" for="{{ subsubtopic.abbrv }}">
+							<a href="{{ subsubtopic.get_absolute_url }}">{{ subsubtopic.name|title }}</a>
+						</label>
+					</div>
+					{% endfor %}
+				</div>
+				{% else %}
+				<div class="form-check">
+					<input
+						class="form-check-input"
+						name="categories"
+						type="checkbox"
+						value="{{ subtopic.abbrv }}"
+						id="{{ subtopic.abbrv }}"
+						{% if not user.is_authenticated %}
+						disabled
+						{% endif %}
+						hx-trigger="click"
+						hx-target="#newsletter-list"
+						hx-post="{% url 'newsletter:topic-subscription' subtopic.abbrv %}"
+						{% if user.is_authenticated and subtopic in user.subscribed_topics.all %} checked {% endif %}
+					/>
+					<label class="form-check-label" for="{{ subtopic.abbrv }}">
+						<a href="{{ subtopic.get_absolute_url }}">{{ subtopic.name|title }}</a>
+					</label>
+				</div>
+				{% endif %} 
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="d-flex justify-content-center">
+		<a href="#" class="btn btn-primary rounded-0 btn-lg">
+			Back to top
+		</a>
+	</div>
+</form>
