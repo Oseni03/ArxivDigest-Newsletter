@@ -25,6 +25,8 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = []
 
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000/"]
+
 DOMAIN_URL = env("DOMAIN_URL")
 
 # Application definition
@@ -45,7 +47,6 @@ INSTALLED_APPS = [
     "newsletter",
     "accounts",
     "subscription",
-    "alert",
     # django-allauth
     "allauth",
     "allauth.account",

@@ -11,8 +11,7 @@ from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from pytz import timezone
 
-from accounts.models import Schedule
-from newsletter.models import Newsletter, Paper, PaperTopic
+from newsletter.models import Newsletter, Paper, Category
 
 User = get_user_model()
 
@@ -23,12 +22,9 @@ logger = logging.getLogger(__name__)
 class NewsletterEmailSender:
     """The main class that handles sending email newsletters"""
 
-    def __init__(
-        self, topics: List[PaperTopic] = None, schedule: Schedule = None
-    ):
+    def __init__(self, topics: List[Category] = None):
         self.topics = self._get_topics(topics=topics)
         # Schedule
-        self.schedule = schedule
         # Size of each batch to be sent
         self.batch_size = settings.NEWSLETTER_EMAIL_BATCH_SIZE
         # list of topics that were sent
@@ -57,9 +53,9 @@ class NewsletterEmailSender:
         return topics
     
     @staticmethod
-    def _get_newsletter(topic: PaperTopic):
+    def _get_newsletter(topic: Category):
         subject = f"ArxivDigest - {topic.name}"
-        papers = Paper.objects.filter(topics=topic, is_visible=True)
+        papers = Paper.objects.filter(categories=topic, is_visible=True)
 
         context = {
             "topic": topic,
@@ -229,9 +225,8 @@ class NewsletterEmailSender:
         )
 
 
-def send_email_newsletter(
-    topics: List[PaperTopic] = None, schedule: Schedule = Schedule.DAILY
-):
+def send_email_newsletter(topics: List[Category] = None):
+    return
     logger.info(f"About to send out newsletter for {schedule} schedule")
     send_newsletter = NewsletterEmailSender(topics=topics, schedule=schedule)
     send_newsletter.send_emails()
