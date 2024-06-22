@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from django.db import transaction
 
-# from newsletter.models import Category, Paper
-# from newsletter.tasks import embed_papers
+from newsletter.models import Category, Paper
+from newsletter.tasks import embed_papers
 
 
 user_agents = [
@@ -36,7 +36,7 @@ user_agents = [
 ]
 
 
-def get_subsubfields(url="https://arxiv.org/archive/q-bio"):
+def get_sub_categories(url="https://arxiv.org/archive/q-bio"):
     response = requests.get(
         url, headers={"User-Agent": random.choice(user_agents)}
     )
@@ -62,7 +62,7 @@ def get_subsubfields(url="https://arxiv.org/archive/q-bio"):
     return subsubfields_list
 
 
-def get_fields(
+def get_categories(
     url="https://www.arxiv.org", path="newsletter/utils/data/arxiv_topics.json"
 ):
     response = urllib.request.urlopen(
@@ -84,7 +84,7 @@ def get_fields(
                 {
                     "name": sub.text,
                     "abbrv": abbrv,
-                    "sub_fields": get_subsubfields(main_url),
+                    "sub_fields": get_sub_categories(main_url),
                 }
             )
 
@@ -101,20 +101,11 @@ def get_fields(
     return fields_list
 
 
-def load_fields(fields: list, parent_field=None):
-    for field in fields:
-        if parent_field:
-            topic = Category.objects.create(
-                name=field["name"], abbrv=field.get("abbrv", None), parent=parent_field
-            )
-        else:
-            topic = Category.objects.create(
-                name=field["name"], abbrv=field.get("abbrv", None)
-            )
-
-        sub_fields = field.get("sub_fields", [])
-        if sub_fields:
-            load_fields(sub_fields, topic)
+def load_categories(categories: list, parent_field=None):
+    for field in categories:
+        topic, _ = Category.objects.get_or_create(
+            name=field["name"], abbrv=field.get("abbrv", None)
+        )
 
 
 def _download_new_papers(field_abbr, path):
@@ -254,11 +245,11 @@ def get_papers(limit=None, path="newsletter/utils/data/papers"):
 
 
 if __name__ == "__main__":
-    # fields = get_fields()
+    # fields = get_categories()
 
     # load_fields(fields)
 
     # papers = get_papers("cs.AI")
     # print(papers)
 
-    print(get_subsubfields())
+    print(get_sub_categories())
