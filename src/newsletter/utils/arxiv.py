@@ -4,6 +4,7 @@ import tqdm
 import json
 import pytz
 import random
+import requests
 import datetime
 import threading
 import urllib.request
@@ -11,8 +12,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from django.db import transaction
 
-from newsletter.models import PaperTopic, Paper
-from newsletter.tasks import embed_papers
+# from newsletter.models import Category, Paper
+# from newsletter.tasks import embed_papers
 
 
 user_agents = [
@@ -35,8 +36,8 @@ user_agents = [
 ]
 
 
-def get_subsubfields(url="https://arxiv.org/archive/astro-ph"):
-    response = urllib.request.urlopen(
+def get_subsubfields(url="https://arxiv.org/archive/q-bio"):
+    response = requests.get(
         url, headers={"User-Agent": random.choice(user_agents)}
     )
     soup = BeautifulSoup(response.text, "html.parser")
@@ -100,14 +101,14 @@ def get_fields(
     return fields_list
 
 
-def load_fields(fields: list, parent_field: PaperTopic = None):
+def load_fields(fields: list, parent_field=None):
     for field in fields:
         if parent_field:
-            topic = PaperTopic.objects.create(
+            topic = Category.objects.create(
                 name=field["name"], abbrv=field.get("abbrv", None), parent=parent_field
             )
         else:
-            topic = PaperTopic.objects.create(
+            topic = Category.objects.create(
                 name=field["name"], abbrv=field.get("abbrv", None)
             )
 
@@ -221,7 +222,7 @@ def get_papers(limit=None, path="newsletter/utils/data/papers"):
 
     results = []
 
-    topics = PaperTopic.objects.all()
+    topics = Category.objects.all()
     threads = []
 
     for topic in topics:
@@ -257,5 +258,7 @@ if __name__ == "__main__":
 
     # load_fields(fields)
 
-    papers = get_papers("cs.AI")
-    print(papers)
+    # papers = get_papers("cs.AI")
+    # print(papers)
+
+    print(get_subsubfields())

@@ -12,8 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .utils import send_subscription_verification_email, send_welcome_email
 
-from newsletter.models import PaperTopic
-from subscription.models import Price
+from newsletter.models import Category
 
 
 class CustomUserManager(BaseUserManager):
@@ -62,16 +61,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     token = models.CharField(max_length=128, unique=True, default=uuid.uuid4)
     verified = models.BooleanField(default=False)
     verification_sent_date = models.DateTimeField(blank=True, null=True)
-
-    # newsletters
-    subscribed_topics = models.ManyToManyField(
-        PaperTopic, related_name="users", through="Subscription"
-    )
-
-    # subscription
-    is_paid_subscriber = models.BooleanField(default=False)
-    plan = models.ForeignKey(Price, on_delete=models.SET_NULL, null=True)
-    customer_id = models.CharField(max_length=300, null=True, blank=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = "email"
@@ -168,29 +157,5 @@ class User(AbstractBaseUser, PermissionsMixin):
             "accounts:email-confirmation", kwargs={"token": self.token}
         )
 
-    def subscribed_to(self, topic: PaperTopic):
-        return topic in self.subscribed_topics.all()
-
-
-class Schedule(models.TextChoices):
-    DAILY = "DAILY", _("Daily")
-    WEEKLY = "WEEKLY", _("Weekly")
-    BI_WEEKLY = "BI_WEEKLY", _("Bi Weekly")
-    TRI_WEEKLY = "TRI_WEEKLY", _("Tri Weekly")
-
-
-class Subscription(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="subscriptions"
-    )
-    topic = models.ForeignKey(PaperTopic, on_delete=models.CASCADE)
-    schedule = models.CharField(
-        max_length=15, choices=Schedule.choices, default=Schedule.WEEKLY
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        models.UniqueConstraint(
-            fields=["user", "topic"], name="unique_user_subscription"
-        )
+    def subscribed_to(self, category: Category):
+        return category in self.categories.all()

@@ -5,15 +5,16 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+# from langdetect import detect
+# from langdetect.lang_detect_exception import LangDetectException
 from pgvector.django import L2Distance, VectorField
-from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer
+# from sentence_transformers import SentenceTransformer
+# from transformers import AutoTokenizer
 
 from ckeditor.fields import RichTextField
-from mptt.models import MPTTModel, TreeForeignKey
 
 # from . import signals
-from .querysets import PaperQuerySet, PaperTopicQuerySet
+from .querysets import PaperQuerySet
 
 
 class AbstractBaseModel(models.Model):
@@ -32,34 +33,34 @@ class AbstractBaseModel(models.Model):
         return "ah yes"
 
 
-class PaperTopic(MPTTModel):
+class Category(models.Model):
     name = models.CharField(max_length=255)
-    abbrv = models.CharField(max_length=50, unique=True, null=True)
-    parent = TreeForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="children",
-    )
+    abbrv = models.CharField(max_length=50, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(null=True, blank=True)
 
-    objects = PaperTopicQuerySet.as_manager()
+    # newsletters
+    subscribers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="categories")
 
     class MPTTMeta:
         order_insertion_by = ["name"]
-        verbose_name_plural = _("Paper topics")
+        verbose_name_plural = _("categories")
 
     def __str__(self):
         return str(self.name)
 
     def get_absolute_url(self):
-        return reverse("newsletter:topic_detail", args=(self.abbrv,))
+        return reverse("newsletter:category_detail", args=(self.abbrv,))
+    
+    def save(self, *args, **kwargs) -> None:
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
 
 
 class Paper(models.Model):
-    topics = models.ManyToManyField(PaperTopic, related_name="papers")
+    categories = models.ManyToManyField(Category, related_name="papers")
     title = models.CharField(max_length=255)
     authors = models.CharField(max_length=300)
     paper_number = models.CharField(max_length=15, unique=True)
@@ -212,11 +213,8 @@ from alert.models import Alert
 
 
 class Newsletter(AbstractBaseModel):
-    topic = models.ForeignKey(
-        PaperTopic, related_name="newsletters", on_delete=models.CASCADE, null=True
-    )
-    alert = models.ForeignKey(
-        Alert, related_name="newsletters", on_delete=models.CASCADE, null=True
+    category = models.ForeignKey(
+        Category, related_name="newsletters", on_delete=models.CASCADE, null=True
     )
     subject = models.CharField(max_length=255)
     content = RichTextField()
@@ -226,7 +224,7 @@ class Newsletter(AbstractBaseModel):
     slug = models.SlugField(unique=True)
 
     def __str__(self):
-        return str(self.topic)
+        return str(self.category)
 
     def save(self, **kwargs) -> None:
         if not self.slug:

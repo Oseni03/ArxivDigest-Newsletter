@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User, Subscription
+from .models import User
 
 
 # Register your models here.
@@ -21,17 +21,4 @@ class UserAdmin(admin.ModelAdmin):
     exclude = ("token",)
 
 
-class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = (
-        "topic",
-        "user",
-        "created_at",
-    )
-    list_filter = (
-        "topic",
-        "user",
-    )
-
-
 admin.site.register(User, UserAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
