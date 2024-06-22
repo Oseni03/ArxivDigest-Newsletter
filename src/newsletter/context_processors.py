@@ -1,7 +1,7 @@
-from .models import PaperTopic
+from .models import Category
 
 
 def newsletter(request):
     return {
-        "topics": PaperTopic.objects.prefetch_related("children").parents(),
+        "topics": Category.objects.all(),
     }

@@ -6,7 +6,7 @@ app_name = "newsletter"
 
 urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
-    path("topics/<str:abbrv>/", views.TopicDetailView.as_view(), name="topic_detail"),
+    path("topics/<str:slug>/", views.TopicDetailView.as_view(), name="topic_detail"),
     path(
         "abs/<str:paper_number>/",
         views.PaperDetailView.as_view(),

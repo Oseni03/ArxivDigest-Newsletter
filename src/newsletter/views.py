@@ -10,12 +10,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, FormView, ListView, TemplateView, View
 
 from .forms import SubscriberEmailForm
-from .models import PaperTopic, Paper, Newsletter
+from .models import Category, Paper, Newsletter
 from .utils.email_validator import email_is_valid
-
-from accounts.models import User
-from alert.forms import AlertForm
-from alert.models import Alert
 
 
 class HomeView(View):
@@ -33,10 +29,10 @@ class HomeView(View):
 
 
 class TopicDetailView(DetailView):
-    model = PaperTopic
+    model = Category
     template_name = "newsletter/topic_detail.html"
-    slug_url_kwarg = "abbrv"
-    slug_field = "abbrv"
+    slug_url_kwarg = "slug"
+    slug_field = "slug"
     context_object_name = "topic"
 
     def get_context_data(self, **kwargs):
@@ -63,28 +59,20 @@ class NewsletterListView(ListView):
     template_name = "newsletter/newsletters.html"
     context_object_name = "newsletters"
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["alert_form"] = AlertForm
-        if self.request.user.is_authenticated:
-            context["alerts"] = Alert.objects.filter(user=self.request.user)
-        return context
-
-
 @login_required
 def topic_subscription(request, topic_abbrv: str):
-    topic = get_object_or_404(PaperTopic, abbrv=topic_abbrv)
+    topic = get_object_or_404(Category, abbrv=topic_abbrv)
     user = request.user
-    if topic in user.subscribed_topics.all():
-        user.subscribed_topics.remove(topic)
+    if topic in user.categories.all():
+        user.categories.remove(topic)
     else:
-        user.subscribed_topics.add(topic)
+        user.categories.add(topic)
     user.save()
 
     current_url = request.htmx.current_url
     if "newsletters" in current_url:
         context = {
-            "topics": PaperTopic.objects.prefetch_related("children").parents(),
+            "topics": Category.objects.all(),
         }
         return render(request, "newsletter/partials/_newsletter_list.html", context)
     else:
