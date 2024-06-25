@@ -29,7 +29,7 @@ class HomeView(View):
         return render(request, self.template_name, context)
 
 
-class TopicDetailView(DetailView):
+class CategoryDetailView(DetailView):
     model = Category
     template_name = "newsletter/topic_detail.html"
     slug_url_kwarg = "slug"
@@ -47,13 +47,6 @@ class TopicDetailView(DetailView):
         return context
 
 
-def parent_topic_detail(request, id):
-    topic = PaperTopic.objects.get(id=id)
-    return render(
-        request, "newsletter/partials/_topic_list_modal.html", {"topic": topic}
-    )
-
-
 class PaperDetailView(DetailView):
     model = Paper
     template_name = "newsletter/paper_detail.html"
@@ -67,9 +60,10 @@ class NewsletterListView(ListView):
     template_name = "newsletter/newsletters.html"
     context_object_name = "newsletters"
 
+
 @login_required
-def topic_subscription(request, topic_abbrv: str):
-    topic = get_object_or_404(Category, abbrv=topic_abbrv)
+def topic_subscription(request):
+    topic = get_object_or_404(Category, slug=slug)
     user = request.user
     if topic in user.categories.all():
         user.categories.remove(topic)
@@ -86,4 +80,14 @@ def topic_subscription(request, topic_abbrv: str):
     else:
         return render(
             request, "newsletter/partials/_topic_header.html", {"topic": topic}
+        )
+
+
+def subscribe_modal(request, slug):
+    if slug == "all":
+        pass
+    else:
+        category = get_object_or_404(Category, slug=slug)
+        return render(
+            request, "newsletter/partials/_subscribe_modal.html", {"category": category}
         )

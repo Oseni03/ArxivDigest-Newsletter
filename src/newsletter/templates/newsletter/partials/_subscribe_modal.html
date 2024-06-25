@@ -1,0 +1,33 @@
+{% load static %}
+{% load widget_tweaks %} 
+
+<div class="modal" id="subscriptionModal" tabindex="-1">
+	<div class="modal-dialog modal-dialog-lg modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-body p-5">
+				<h1 class="text-primary">Subscribe to {{ category.name|title }}</h1>
+				<p class="my-2">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+					Natus quia dignissimos excepturi praesentium, repudiandae
+					voluptates ipsum culpa illo hic dolor.
+				</p>
+				<form
+					method="post"
+					action="{% url 'accounts:subscribe' %}"
+				>
+					{% csrf_token %}
+					<div class="input-group mb-3">
+						{% render_field subscription_form.email class="form-control" placeholder="Enter your email address" aria-describedby="button-addon2" %}
+						<button
+							class="btn btn-primary btn-md-lg"
+							type="submit"
+							id="button-addon2"
+						>
+							Subscribe
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

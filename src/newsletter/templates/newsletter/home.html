@@ -37,10 +37,39 @@
   </div>
 </div>
 
+<div class="container"><hr class="fw-bold"/></div>
+
 <div class="container">
-  <div class="mt-4">
-    <h4 class="text-primary fw-bold">Latest papers</h4>
-    {% include "newsletter/partials/_paper_list.html" %}
+  <div class="my-3">
+    <h4 class="text-primary fw-bold my-3">Categories</h4>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+      {% for category in categories %}
+      <div class="col">
+        <div class="card shadow-sm">
+          <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"/><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+          <div class="card-body">
+            <h4 class="card-title">{{ category.name|title }}</h4>
+            <p class="card-text">Aliquid corporis facilis? Quos molestias eaque suscipit iure neque quod? Sint veniam accusantium laudantium perspiciatis vitae, provident eaque tempora quis ut dolor, nulla cum facere.</p>
+            <hr/>
+            <!-- Modal trigger for Category subsrciption -->
+            <a 
+              id="subscribe-button"
+              href="#" 
+              type="button" 
+              class="link-dark link-offset-2 link-underline-opacity-0" 
+              data-bs-toggle="modal"
+              data-bs-target="#subscriptionModal"
+              hx-get="{% url "newsletter:subscribe-modal" category.slug %}"
+              hx-target="#subscribe-modal"
+            >
+              Subscribe
+            </a>
+            <hr/>
+            <a href="#" class="link-dark link-offset-2 link-underline-opacity-0" >Read the Latest</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
 </div>

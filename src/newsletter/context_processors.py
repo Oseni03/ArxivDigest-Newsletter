@@ -3,5 +3,5 @@ from .models import Category
 
 def newsletter(request):
     return {
-        "topics": Category.objects.all(),
+        "categories": Category.objects.all(),
     }

@@ -1,180 +1,28 @@
 {% load static %} {% load widget_tweaks %} {% load mptt_tags %}
 
-<div class="modal" id="subscriptionModal" tabindex="-1">
-	<div class="modal-dialog modal-md-lg modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-body text-center p-5">
-				<h1 class="text-primary">Subscribe To Our Newsletter</h1>
-				<p class="my-2">
-					Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-					Natus quia dignissimos excepturi praesentium, repudiandae
-					voluptates ipsum culpa illo hic dolor.
-				</p>
-				<form
-					method="post"
-					action="{% url 'accounts:subscribe' %}"
-				>
-					{% csrf_token %}
-					<div class="input-group mb-3">
-						{% render_field subscription_form.email class="form-control" placeholder="Email address" aria-describedby="button-addon2" %}
-						<button
-							class="btn btn-primary btn-md-lg"
-							type="submit"
-							id="button-addon2"
-						>
-							Subscribe
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="container-fluid">
-	<header
-		class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between px-sm-0 py-3 p-md-3 mb-4 border-bottom"
-	>
-		<div class="col-md-3 mb-2 mb-md-0">
-			<a
-				href="/"
-				class="d-inline-flex link-body-emphasis text-decoration-none"
-			>
-				<svg
-					class="bi"
-					width="40"
-					height="32"
-					role="img"
-					aria-label="Bootstrap"
-				>
-					<use xlink:href="#bootstrap"></use>
-				</svg>
-			</a>
-		</div>
-
-		<ul
-			class="nav nav-pill col-12 col-md-auto mb-2 justify-content-center mb-md-0"
-		>
-			<li>
-				<a href="/" class="nav-link active px-2 link-secondary">Home</a>
-			</li>
-			<li>
-				<a
-					href="{% url 'newsletter:newsletters' %}"
-					class="nav-link px-2"
-					>Newsletters</a
-				>
-			</li>
-			{% comment %}
-			<li>
-				<a href="{% url 'subscription:pricing' %}" class="nav-link px-2"
-				>Pricing</a
-				>
-			</li>
-			{% endcomment %}
-			<li class="dropdown">
-				<a
-					href="#"
-					class="nav-link px-2 dropdown-toggle"
-					href="#"
-					role="button"
-					data-bs-toggle="dropdown"
-					aria-expanded="false"
-					>Category</a
-				>
-				<ul class="dropdown-menu">
-					{% for topic in topics %} 
-					{% if not topic.is_leaf_node %}
-					<li>
-						<a class="dropdown-item" href="#">
-							{{ topic.name }} &raquo;
-						</a>
-						<ul class="submenu dropdown-menu">
-							{% for subtopic in topic.get_children %} 
-							{% if not subtopic.is_leaf_node %}
-							<li>
-								<a
-									class="dropdown-item"
-									href="{{ subtopic.get_absolute_url }}"
-									>{{ subtopic.name }} &raquo;
-								</a>
-								<ul class="submenu dropdown-menu">
-									{% for subsubtopic in subtopic.get_children %}
-									<li>
-										<a
-											class="dropdown-item"
-											href="{{ subsubtopic.get_absolute_url }}"
-											>{{ subsubtopic.name }}</a
-										>
-									</li>
-									{% endfor %}
-								</ul>
-							</li>
-							{% else %}
-							<li>
-								<a
-									class="dropdown-item"
-									href="{{ subtopic.get_absolute_url }}"
-								>
-									{{ subtopic.name }}
-								</a>
-							</li>
-							{% endif %} 
-							{% endfor %}
-						</ul>
-					</li>
-					{% else %}
-					<li>
-						<a
-							class="dropdown-item"
-							href="{{ topic.get_absolute_url }}"
-						>
-							{{ topic.name }}
-						</a>
-					</li>
-					{% endif %} 
-					{% endfor %}
-				</ul>
-			</li>
-			<li><a href="#" class="nav-link px-2">About</a></li>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+	<div class="container-fluid container-md">
+	  <a class="navbar-brand fs-4 fw-bold" href="#">
+		HealthDigest
+	  </a>
+	  <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	  </button>
+	  <div class="navbar-collapse collapse" id="navbarSupportedContent" style="">
+		<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+		  <li class="nav-item">
+			<a class="nav-link active" aria-current="page" href="#">Home</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="#">Link</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="#">Link</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="#">Link</a>
+		  </li>
 		</ul>
-		{% if user.is_authenticated %}
-		<div class="col-md-3 text-end">
-			{% if user.is_paid_subscriber %}
-			<a
-				href="{% url 'subscription:billing-portal' %}"
-				class="btn btn-primary me-2"
-				>Upgrade</a
-			>
-			{% else %}
-			<a
-				href="{% url 'subscription:pricing' %}"
-				class="btn btn-primary me-2"
-				>Upgrade</a
-			>
-			{% endif %}
-			<a
-				href="{% url 'accounts:logout' %}"
-				class="btn btn-outline-primary me-2"
-				>Sign Out</a
-			>
-		</div>
-		{% else %}
-		<div class="col-md-3 text-end">
-			<button
-				type="button"
-				class="btn btn-primary"
-				data-bs-toggle="modal"
-				data-bs-target="#subscriptionModal"
-			>
-				Subscribe
-			</button>
-			<a
-				href="{% url 'accounts:login' %}"
-				class="btn btn-outline-primary me-2"
-				>Login</a
-			>
-		</div>
-		{% endif %}
-	</header>
-</div>
+	  </div>
+	</div>
+  </nav>

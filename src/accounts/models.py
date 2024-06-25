@@ -12,8 +12,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .utils import send_subscription_verification_email, send_welcome_email
 
-from newsletter.models import Category
-
 
 class CustomUserManager(BaseUserManager):
     """Custome user manager."""
@@ -156,6 +154,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         return reverse(
             "accounts:email-confirmation", kwargs={"token": self.token}
         )
-
-    def subscribed_to(self, category: Category):
-        return category in self.categories.all()
