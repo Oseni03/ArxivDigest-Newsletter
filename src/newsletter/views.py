@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, FormView, ListView, TemplateView, View
 
-from .forms import SubscriberEmailForm
+from .forms import SubscriberEmailForm, SubscriptionForm
 from .models import Category, Paper, Newsletter
 from .utils.email_validator import email_is_valid
 
@@ -55,14 +55,13 @@ class PaperDetailView(DetailView):
     context_object_name = "paper"
 
 
-class NewsletterListView(ListView):
-    model = Newsletter
-    template_name = "newsletter/newsletters.html"
-    context_object_name = "newsletters"
+class NewsletterView(FormView):
+    form_class = SubscriptionForm
+    template_name = "newsletter/subscription.html"
 
 
 @login_required
-def topic_subscription(request):
+def topic_subscription(request, slug):
     topic = get_object_or_404(Category, slug=slug)
     user = request.user
     if topic in user.categories.all():
